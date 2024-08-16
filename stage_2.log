@@ -1,0 +1,86 @@
+SQL:
+ 
+CREATE OR REPLACE TABLE nessie.db.orders_2
+USING iceberg
+AS SELECT
+    src.Order_ID, src.Date, src.Status, src.Fulfilment, src.Sales_Channel, src.ship_service_level, src.Category, src.Size, src.Courier_Status, src.Qty, src.currency, ROUND(src.Amount, 2) AS Amount, src.ship_city, src.ship_state, src.ship_postal_code, src.ship_country, src.B2B, src.fulfilled_by, src.New, src.PendingS
+FROM 
+    nessie.db.orders_1 AS src
+WHERE
+    src.Sales_Channel IN 
+            (
+                SELECT 
+                    Sales_Channel
+                FROM
+                    nessie.keys.Sales_Channel
+            ) AND src.Status IN 
+            (
+                SELECT 
+                    Status
+                FROM
+                    nessie.keys.Status
+            ) AND src.Category IN 
+            (
+                SELECT 
+                    Category
+                FROM
+                    nessie.keys.Category
+            ) AND src.Fulfilment IN 
+            (
+                SELECT 
+                    Fulfilment
+                FROM
+                    nessie.keys.Fulfilment
+            );
+
+Data from the previous stage
++-------------------+----------+--------------------+----------+-------------+------------------+--------+----+--------------+---+--------+------------------+---------+----------------+----------------+------------+-----+------------+----+--------+
+|           Order_ID|      Date|              Status|Fulfilment|Sales_Channel|ship_service_level|Category|Size|Courier_Status|Qty|currency|            Amount|ship_city|      ship_state|ship_postal_code|ship_country|  B2B|fulfilled_by| New|PendingS|
++-------------------+----------+--------------------+----------+-------------+------------------+--------+----+--------------+---+--------+------------------+---------+----------------+----------------+------------+-----+------------+----+--------+
+|403-1147455-0953128|2022-04-26|             Shipped|    Amazon|    Amazon.in|         Expedited| T-shirt|   M|       Shipped|  1|     INR|1648.0120845767817|   MUMBAI|     MAHARASHTRA|          400089|          IN|false|        NULL|NULL|    NULL|
+|402-6247468-4355542|2022-04-27|Shipped - Deliver...|  Merchant|    Amazon.in|          Standard|   Shirt|   L|       Shipped|  1|     INR| 458.9144711459592|LAKHIMPUR|   UTTAR PRADESH|          262701|          IN|false|   Easy Ship|NULL|    NULL|
+|404-4388660-6585119|2022-04-30|             Shipped|    Amazon|    Amazon.in|         Expedited| T-shirt|   L|       Shipped|  1|     INR| 1186.017084569087|HYDERABAD|       TELANGANA|          500050|          IN|false|        NULL|NULL|    NULL|
+|407-9287244-6741956|2022-04-28|             Shipped|    Amazon|    Amazon.in|         Expedited| Blazzer|  XL|       Shipped|  1|     INR| 884.9918157660143|    SURAT|         Gujarat|          395009|          IN|false|        NULL|NULL|    NULL|
+|404-1580706-8406729|2022-04-30|             Shipped|    Amazon|    Amazon.in|         Expedited|   Shirt|  XL|       Shipped|  1|     INR| 474.9775639948803|  CHENNAI|      TAMIL NADU|          600028|          IN|false|        NULL|NULL|    NULL|
+|171-4519721-7419566|2022-04-29|Shipped - Deliver...|  Merchant|    Amazon.in|          Standard| T-shirt|  XL|       Shipped|  1|     INR| 816.0325626263244| GURUGRAM|         HARYANA|          122002|          IN|false|   Easy Ship|NULL|    NULL|
+|405-0892389-6639551|2022-04-24|             Shipped|    Amazon|    Amazon.in|         Expedited| T-shirt|  XS|       Shipped|  1|     INR| 455.0618502998357|Bengaluru|       KARNATAKA|          560076|          IN|false|        NULL|NULL|    NULL|
+|404-9948787-3166729|2022-04-24|             Shipped|    Amazon|    Amazon.in|         Expedited| Blazzer|  XL|       Shipped|  1|     INR| 744.0668805712354|GHAZIABAD|   UTTAR PRADESH|          201009|          IN|false|        NULL|NULL|    NULL|
+|403-5061524-1069157|2022-04-28|             Shipped|    Amazon|    Amazon.in|         Expedited| T-shirt|  XS|       Shipped|  1|     INR| 1111.936616524575|   BHILAI|    CHHATTISGARH|          490006|          IN|false|        NULL|NULL|    NULL|
+|402-8288606-4313118|2022-04-30|             Shipped|    Amazon|    Amazon.in|         Expedited|   Shirt|   M|       Shipped|  1|     INR| 516.9989855015194| BILASPUR|HIMACHAL PRADESH|          174001|          IN|false|        NULL|NULL|    NULL|
+|405-4273004-7443538|2022-04-26|             Shipped|    Amazon|    Amazon.in|         Expedited|   Shirt|   L|       Shipped|  1|     INR| 353.0136606202708|   PILERU|  ANDHRA PRADESH|          517214|          IN|false|        NULL|NULL|    NULL|
+|408-2830412-5001168|2022-04-29|Shipped - Deliver...|  Merchant|    Amazon.in|          Standard|   Shirt|   M|       Shipped|  1|     INR| 499.0060075980319|   PUTTUR|       KARNATAKA|          574203|          IN|false|   Easy Ship|NULL|    NULL|
+|404-8541183-2625124|2022-04-27|Shipped - Deliver...|  Merchant|    Amazon.in|          Standard| T-shirt|  XL|       Shipped|  1|     INR| 611.9737196812274|   GANJAM|          ODISHA|          761121|          IN|false|   Easy Ship|NULL|    NULL|
+|404-0666105-3601963|2022-04-25|Shipped - Deliver...|  Merchant|    Amazon.in|          Standard|   Shirt| 3XL|       Shipped|  1|     INR| 517.0061174701829| GURUGRAM|         HARYANA|          122004|          IN|false|   Easy Ship|NULL|    NULL|
+|405-3036350-8089120|2022-04-30|             Shipped|    Amazon|    Amazon.in|         Expedited|   Shirt|   M|       Shipped|  1|     INR| 794.9761527705574|ANKLESHWR|         Gujarat|          393002|          IN|false|        NULL|NULL|    NULL|
+|403-3329838-9233131|2022-04-29|             Shipped|    Amazon|    Amazon.in|         Expedited| T-shirt|   M|       Shipped|  1|     INR| 653.9959868395791|  LUCKNOW|   UTTAR PRADESH|          226003|          IN|false|        NULL|NULL|    NULL|
++-------------------+----------+--------------------+----------+-------------+------------------+--------+----+--------------+---+--------+------------------+---------+----------------+----------------+------------+-----+------------+----+--------+
+
+Data after validation
++-----+
+|cnt_2|
++-----+
+|   16|
++-----+
+
++-------------------+----------+--------------------+----------+-------------+------------------+--------+----+--------------+---+--------+-------+---------+----------------+----------------+------------+-----+------------+----+--------+
+|           Order_ID|      Date|              Status|Fulfilment|Sales_Channel|ship_service_level|Category|Size|Courier_Status|Qty|currency| Amount|ship_city|      ship_state|ship_postal_code|ship_country|  B2B|fulfilled_by| New|PendingS|
++-------------------+----------+--------------------+----------+-------------+------------------+--------+----+--------------+---+--------+-------+---------+----------------+----------------+------------+-----+------------+----+--------+
+|403-1147455-0953128|2022-04-26|             Shipped|    Amazon|    Amazon.in|         Expedited| T-shirt|   M|       Shipped|  1|     INR|1648.01|   MUMBAI|     MAHARASHTRA|          400089|          IN|false|        NULL|NULL|    NULL|
+|402-6247468-4355542|2022-04-27|Shipped - Deliver...|  Merchant|    Amazon.in|          Standard|   Shirt|   L|       Shipped|  1|     INR| 458.91|LAKHIMPUR|   UTTAR PRADESH|          262701|          IN|false|   Easy Ship|NULL|    NULL|
+|404-4388660-6585119|2022-04-30|             Shipped|    Amazon|    Amazon.in|         Expedited| T-shirt|   L|       Shipped|  1|     INR|1186.02|HYDERABAD|       TELANGANA|          500050|          IN|false|        NULL|NULL|    NULL|
+|407-9287244-6741956|2022-04-28|             Shipped|    Amazon|    Amazon.in|         Expedited| Blazzer|  XL|       Shipped|  1|     INR| 884.99|    SURAT|         Gujarat|          395009|          IN|false|        NULL|NULL|    NULL|
+|404-1580706-8406729|2022-04-30|             Shipped|    Amazon|    Amazon.in|         Expedited|   Shirt|  XL|       Shipped|  1|     INR| 474.98|  CHENNAI|      TAMIL NADU|          600028|          IN|false|        NULL|NULL|    NULL|
+|171-4519721-7419566|2022-04-29|Shipped - Deliver...|  Merchant|    Amazon.in|          Standard| T-shirt|  XL|       Shipped|  1|     INR| 816.03| GURUGRAM|         HARYANA|          122002|          IN|false|   Easy Ship|NULL|    NULL|
+|405-0892389-6639551|2022-04-24|             Shipped|    Amazon|    Amazon.in|         Expedited| T-shirt|  XS|       Shipped|  1|     INR| 455.06|Bengaluru|       KARNATAKA|          560076|          IN|false|        NULL|NULL|    NULL|
+|404-9948787-3166729|2022-04-24|             Shipped|    Amazon|    Amazon.in|         Expedited| Blazzer|  XL|       Shipped|  1|     INR| 744.07|GHAZIABAD|   UTTAR PRADESH|          201009|          IN|false|        NULL|NULL|    NULL|
+|403-5061524-1069157|2022-04-28|             Shipped|    Amazon|    Amazon.in|         Expedited| T-shirt|  XS|       Shipped|  1|     INR|1111.94|   BHILAI|    CHHATTISGARH|          490006|          IN|false|        NULL|NULL|    NULL|
+|402-8288606-4313118|2022-04-30|             Shipped|    Amazon|    Amazon.in|         Expedited|   Shirt|   M|       Shipped|  1|     INR|  517.0| BILASPUR|HIMACHAL PRADESH|          174001|          IN|false|        NULL|NULL|    NULL|
+|405-4273004-7443538|2022-04-26|             Shipped|    Amazon|    Amazon.in|         Expedited|   Shirt|   L|       Shipped|  1|     INR| 353.01|   PILERU|  ANDHRA PRADESH|          517214|          IN|false|        NULL|NULL|    NULL|
+|408-2830412-5001168|2022-04-29|Shipped - Deliver...|  Merchant|    Amazon.in|          Standard|   Shirt|   M|       Shipped|  1|     INR| 499.01|   PUTTUR|       KARNATAKA|          574203|          IN|false|   Easy Ship|NULL|    NULL|
+|404-8541183-2625124|2022-04-27|Shipped - Deliver...|  Merchant|    Amazon.in|          Standard| T-shirt|  XL|       Shipped|  1|     INR| 611.97|   GANJAM|          ODISHA|          761121|          IN|false|   Easy Ship|NULL|    NULL|
+|404-0666105-3601963|2022-04-25|Shipped - Deliver...|  Merchant|    Amazon.in|          Standard|   Shirt| 3XL|       Shipped|  1|     INR| 517.01| GURUGRAM|         HARYANA|          122004|          IN|false|   Easy Ship|NULL|    NULL|
+|405-3036350-8089120|2022-04-30|             Shipped|    Amazon|    Amazon.in|         Expedited|   Shirt|   M|       Shipped|  1|     INR| 794.98|ANKLESHWR|         Gujarat|          393002|          IN|false|        NULL|NULL|    NULL|
+|403-3329838-9233131|2022-04-29|             Shipped|    Amazon|    Amazon.in|         Expedited| T-shirt|   M|       Shipped|  1|     INR|  654.0|  LUCKNOW|   UTTAR PRADESH|          226003|          IN|false|        NULL|NULL|    NULL|
++-------------------+----------+--------------------+----------+-------------+------------------+--------+----+--------------+---+--------+-------+---------+----------------+----------------+------------+-----+------------+----+--------+
+
+INFO:py4j.clientserver:Closing down clientserver connection

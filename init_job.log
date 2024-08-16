@@ -1,0 +1,61 @@
+keys_list: ['/unique_keys/Sales_Channel.csv/', '/unique_keys/Status.csv/', '/unique_keys/Category.csv/', '/unique_keys/Fulfilment.csv/']
++-------------+
+|Sales_Channel|
++-------------+
+|   Non-Amazon|
+|    Amazon.in|
++-------------+
+
++--------------------+
+|              Status|
++--------------------+
+|             Shipped|
+|Shipped - Lost in...|
+|Shipped - Deliver...|
++--------------------+
+
++--------+
+|Category|
++--------+
+| T-shirt|
+| Blazzer|
+|Trousers|
++--------+
+
++----------+
+|Fulfilment|
++----------+
+|  Merchant|
+|    Amazon|
++----------+
+
++---------+------------------+-----------+
+|namespace|         tableName|isTemporary|
++---------+------------------+-----------+
+|       db|            orders|      false|
+|       db|          orders_1|      false|
+|       db|          orders_2|      false|
+|     keys|          Category|      false|
+|     keys|    Courier_Status|      false|
+|     keys|        Fulfilment|      false|
+|     keys|               New|      false|
+|     keys|          PendingS|      false|
+|     keys|     Sales_Channel|      false|
+|     keys|              Size|      false|
+|     keys|            Status|      false|
+|     keys|          currency|      false|
+|     keys|      fulfilled_by|      false|
+|     keys|         ship_city|      false|
+|     keys|      ship_country|      false|
+|     keys|ship_service_level|      false|
+|     keys|        ship_state|      false|
++---------+------------------+-----------+
+
++-------+--------+--------------------+
+|refType|    name|                hash|
++-------+--------+--------------------+
+| Branch|    main|fcc776358dd47e3ca...|
+| Branch|validate|fcc776358dd47e3ca...|
++-------+--------+--------------------+
+
+INFO:py4j.clientserver:Closing down clientserver connection
