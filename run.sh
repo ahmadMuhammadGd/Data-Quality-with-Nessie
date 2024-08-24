@@ -19,10 +19,19 @@ sed -i "s|^MINIO_END_POINT.*|MINIO_END_POINT=http://${container_ip}:9000|" confi
 docker compose restart spark
 
 docker exec spark spark-submit /spark-jobs/jobs/init_project.py \
-    > init_job.log
-docker exec spark spark-submit /spark-jobs/jobs/clean_stage_1.py \
-    > stage_1.log
-docker exec spark spark-submit /spark-jobs/jobs/clean_stage_2.py \
-    > stage_2.log
-docker exec spark spark-submit /spark-jobs/jobs/insert_into_main.py \
-    > insert_job.log
+    > bash-logs/0-init_job.log
+
+docker exec spark spark-submit /spark-jobs/jobs/ingest.py \
+    > bash-logs/1-ingest.log
+
+docker exec spark spark-submit /spark-jobs/soda-jobs/checks/bronz_amazon_sales.py \
+    > bash-logs/2-bronze_validation.log
+
+docker exec spark spark-submit /spark-jobs/jobs/cleansing.py \
+    > bash-logs/3-cleansing.log
+
+docker exec spark spark-submit /spark-jobs/soda-jobs/checks/silver_amazon_sales.py \
+    > bash-logs/5-silver_validation.log
+
+docker exec spark spark-submit /spark-jobs/jobs/load.py \
+    > bash-logs/6-load.log
