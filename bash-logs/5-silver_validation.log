@@ -1,0 +1,23 @@
+INFO:soda.scan:[16:43:36] Soda Core 3.3.18
+INFO:soda.scan:[16:43:45] Scan summary:
+INFO:soda.scan:[16:43:45] 13/14 checks PASSED: 
+INFO:soda.scan:[16:43:45]     silver_amazon_orders_temp in bronz_sales
+INFO:soda.scan:[16:43:45]       Schema Check [PASSED]
+INFO:soda.scan:[16:43:45]       row_count > 0 [PASSED]
+INFO:soda.scan:[16:43:45]       duplicate_count(Order_ID, Category, order_Date, Amount) fail when > 0 [PASSED]
+INFO:soda.scan:[16:43:45]       values in (Order_ID, order_Date) must exist in bronze_amazon_orders (Order_ID, order_Date) [PASSED]
+INFO:soda.scan:[16:43:45]       missing_percent(Order_ID) fail when > 0% [PASSED]
+INFO:soda.scan:[16:43:45]       missing_percent(Amount) fail when > 0% [PASSED]
+INFO:soda.scan:[16:43:45]       min(Amount) fail when < 0 [PASSED]
+INFO:soda.scan:[16:43:45]       missing_percent(Qty) fail when > 0% [PASSED]
+INFO:soda.scan:[16:43:45]       min(Qty) fail when < 0 [PASSED]
+INFO:soda.scan:[16:43:45]       invalid_percent(order_Date) fail when > 10% [PASSED]
+INFO:soda.scan:[16:43:45]       missing_percent(Status) fail when > 10% [PASSED]
+INFO:soda.scan:[16:43:45]       missing_percent(Sales_Channel) fail when > 10% [PASSED]
+INFO:soda.scan:[16:43:45]       missing_percent(ship_country) fail when > 10% [PASSED]
+INFO:soda.scan:[16:43:45] 1/14 checks FAILED: 
+INFO:soda.scan:[16:43:45]     silver_amazon_orders_temp in bronz_sales
+INFO:soda.scan:[16:43:45]       data_completeness > 0.9 [FAILED]
+INFO:soda.scan:[16:43:45]         check_value: 0.62
+INFO:soda.scan:[16:43:45] Oops! 1 failures. 0 warnings. 0 errors. 13 pass.
+INFO:py4j.clientserver:Closing down clientserver connection

@@ -1,0 +1,52 @@
+Namespaces .. done
+db tables .. done
+keys_list: ['/unique_keys/Sales_Channel.csv/', '/unique_keys/Status.csv/', '/unique_keys/Category.csv/', '/unique_keys/Fulfilment.csv/']
++-------------+
+|Sales_Channel|
++-------------+
+|   Non-Amazon|
+|    Amazon.in|
++-------------+
+
++--------------------+
+|              Status|
++--------------------+
+|             Shipped|
+|Shipped - Lost in...|
+|Shipped - Deliver...|
++--------------------+
+
++--------+
+|Category|
++--------+
+| T-shirt|
+| Blazzer|
+|Trousers|
++--------+
+
++----------+
+|Fulfilment|
++----------+
+|  Merchant|
+|    Amazon|
++----------+
+
++---------+--------------------+-----------+
+|namespace|           tableName|isTemporary|
++---------+--------------------+-----------+
+|       db|bronze_amazon_orders|      false|
+|       db|silver_amazon_orders|      false|
+|     keys|            Category|      false|
+|     keys|          Fulfilment|      false|
+|     keys|       Sales_Channel|      false|
+|     keys|              Status|      false|
++---------+--------------------+-----------+
+
++-------+--------+--------------------+
+|refType|    name|                hash|
++-------+--------+--------------------+
+| Branch|    main|eee3c807f99de4890...|
+| Branch|validate|2e1d48ff147dee3df...|
++-------+--------+--------------------+
+
+INFO:py4j.clientserver:Closing down clientserver connection
