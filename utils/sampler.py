@@ -46,6 +46,8 @@ try:
     # Save the sampled data as a CSV file
     sample1.write.csv("./batchs/sampled_data_1.csv", header=True)
 
+    # IMPORTANT NOTE
+    # I HAVE NOT UPLOADED dataframe_corrupter TO PYPI YET!
     from dataframe_corrupter import DataFrameCorrupter # type: ignore
     from dataframe_corrupter import ( # type: ignore
         AddDuplicateRowsStrategy,
