@@ -18,6 +18,7 @@ sed -i "s|^MINIO_END_POINT.*|MINIO_END_POINT=http://${container_ip}:9000|" confi
 
 docker compose restart spark
 
+# in this pipeline version, it ALWAYS uses the corupted dataframe 
 docker exec spark spark-submit /spark-jobs/jobs/init_project.py \
     > bash-logs/0-init_job.log
 
