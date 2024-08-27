@@ -58,6 +58,6 @@ checks for silver_amazon_orders_temp:
                     silver_amazon_orders_temp
             )
             SELECT 
-                ROUND(dist_cnt / NULLIF(src_cnt, 0), 2) AS data_completeness
+                ROUND(dist_cnt / COALESCE(src_cnt, 0), 2) AS data_completeness
             FROM 
                 src_cnt, dist_cnt;
