@@ -57,5 +57,5 @@ check(
     scan_definition_name="DQ for bronz amazon sales",
     data_source_name="bronz_sales",
     check_path_yaml=f"/soda/tables/{BRONZE_AMAZON_SALES_TABLE}.yaml",
-    stop_on_fail=False
+    stop_on_fail=True
 )

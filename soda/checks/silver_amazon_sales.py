@@ -29,5 +29,6 @@ check(
     spark_session=spark,
     scan_definition_name="DQ for silver amazon sales",
     data_source_name="bronz_sales",
-    check_path_yaml=f"/soda/tables/{SILVER_AMAZON_SALES_TABLE}.yaml"
+    check_path_yaml=f"/soda/tables/{SILVER_AMAZON_SALES_TABLE}.yaml",
+    stop_on_fail=True
 )
