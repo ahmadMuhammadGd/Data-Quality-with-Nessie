@@ -5,6 +5,6 @@ COPY dockerfiles/airflow/requirements.txt .
 RUN python3 -m pip install --upgrade pip \
 && pip install -r requirements.txt
 
-COPY ./environment.env .
+# COPY ./environment.env .
 
 USER airflow
