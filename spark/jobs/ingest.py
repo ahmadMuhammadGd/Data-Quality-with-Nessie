@@ -4,7 +4,7 @@ import sys
 
 # Define command-line options
 options = "ho:"  
-long_options = ['object_path=', 'help']
+long_options = ['object-path=', 'help']
 
 argument_list = sys.argv[1:]
 try:
@@ -13,16 +13,16 @@ try:
 
     for arg, val in arguments:
         if arg in ("-h", "--help"):
-            print("Usage: python path/to/sparkjob --object_path <path> [options]")
+            print("Usage: python path/to/sparkjob --object-path <path> [options]")
             print("Options:")
             print("  -h, --help            Show this help message")
-            print("  -o, --object_path <path>   Path to the object withou s3a//")
+            print("  -o, --object-path <path>   Path to the object withou s3a//")
             sys.exit()
-        elif arg in ("-o", "--object_path"):
+        elif arg in ("-o", "--object-path"):
             object_path = val
 
     if object_path is None:
-        print("Error: --object_path is required")
+        print("Error: --object-path is required")
         sys.exit(2)
 
     print(f"Object path: {object_path}")
@@ -32,7 +32,6 @@ except getopt.GetoptError as err:
     print("Use -h or --help for usage information.")
     sys.exit(2)
 
-print(f"Your object path is: {object_path}")
 import sys, os 
 sys.path.insert(1, '/spark')
 from modules.SparkIcebergNessieMinIO.spark_setup import init_spark_session
@@ -59,7 +58,8 @@ try:
         .withColumn("Date", to_date("Date", format="dd-mm-yy"))
     
     df.createOrReplaceTempView("batch")
-    
+    print(f"ingested row count: {df.count()}")
+    print(f"switchin to {BRANCH_VALIDATE}")
     spark.sql(f"USE REFERENCE {BRANCH_VALIDATE} IN {NESSIE_CATALOG_NAME}")
     
     spark.sql(f"""

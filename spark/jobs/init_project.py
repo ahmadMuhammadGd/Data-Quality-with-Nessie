@@ -9,7 +9,7 @@ BRANCH_MAIN                         =os.getenv("BRANCH_MAIN")
 BRANCH_VALIDATE                     =os.getenv("BRANCH_VALIDATE")        
 BRONZE_AMAZON_SALES_TABLE           =os.getenv("BRONZE_AMAZON_SALES_TABLE")        
 SILVER_AMAZON_SALES_TABLE           =os.getenv("SILVER_AMAZON_SALES_TABLE")        
-NAMESPACE                          =os.getenv("NAMESPACE")
+NAMESPACE                           =os.getenv("NAMESPACE")
 
 MINIO_ACCESS_KEY                    = os.getenv('MINIO_ACCESS_KEY')
 MINIO_SECRET_KEY                    = os.getenv('MINIO_SECRET_KEY')
@@ -25,12 +25,11 @@ try:
     spark.sql(f"CREATE NAMESPACE IF NOT EXISTS {NESSIE_CATALOG_NAME}.keys")
     
     print("Namespaces .. done")
-    spark.sql(f"DROP TABLE IF EXISTS {NESSIE_CATALOG_NAME}.{NAMESPACE}.{BRONZE_AMAZON_SALES_TABLE}")
-    spark.sql(f"DROP TABLE IF EXISTS {NESSIE_CATALOG_NAME}.{NAMESPACE}.{SILVER_AMAZON_SALES_TABLE}")
     
     spark.sql(
         f"""
-        CREATE TABLE IF NOT EXISTS {NESSIE_CATALOG_NAME}.{NAMESPACE}.{BRONZE_AMAZON_SALES_TABLE} (
+        CREATE OR REPLACE TABLE {NESSIE_CATALOG_NAME}.{NAMESPACE}.{BRONZE_AMAZON_SALES_TABLE}
+        (
             Order_ID            string,
             order_Date          Date,
             Status              string,
@@ -60,7 +59,8 @@ try:
     
     spark.sql(
         f"""
-        CREATE TABLE IF NOT EXISTS {NESSIE_CATALOG_NAME}.{NAMESPACE}.{SILVER_AMAZON_SALES_TABLE} (
+        CREATE OR REPLACE TABLE {NESSIE_CATALOG_NAME}.{NAMESPACE}.{SILVER_AMAZON_SALES_TABLE}
+        (
             Order_ID            string,
             order_Date          Date,
             Status              string,
