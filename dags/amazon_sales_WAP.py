@@ -21,12 +21,12 @@ Dependencies:
 """
 
 from operators.sparkSSH import SSHSparkOperator
-from operators.sodaSSH import SSHSodaOperator
 from airflow.utils.dates import days_ago
 from airflow.decorators import dag, task, task_group
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from hooks.minio_hook import MinIOHook
+from airflow.models import Variable
 import logging
 
 default_args = {
@@ -45,121 +45,138 @@ default_args = {
     default_args=default_args
 )
 def wap():
+    
+    ##############################################################################
+    ##############################################################################
+    ##############################################################################
+    
     # 0. Locate file
     @task.branch(task_id="pick_minio_object")
     def pick_minio_object(**kwargs):
         minio_hook = MinIOHook(
-            endpoint='', 
-            access_key='', 
-            secret_key=''
+            endpoint    =Variable.get("MINIO_END_POINT"), 
+            access_key  =Variable.get("MINIO_ACCESS_KEY"),
+            secret_key  =Variable.get("MINIO_SECRET_KEY"),
         )
-        obj = minio_hook.pick_object(bucket_name='', prefix='', strategy='fifo')
+        obj = minio_hook.pick_object(
+            bucket_name=Variable.get("QUEUED_BUCKET"), 
+            prefix=None, 
+            strategy='fifo'
+        )
         if obj is None:
+            logging.info("could not found any objects")
             return 'stop'
         else:
+            logging.info(f"object found: {obj.object_name}")
             kwargs['ti'].xcom_push(key='current_csv', value=obj.object_name)
             return 'csv_ingestion'
     
     # 0.1 STOP !!!
     stop = EmptyOperator(task_id='stop')
     
+    ##############################################################################
+    ##############################################################################
+    ##############################################################################
+    
     # 1. Ingest csv
     ingest_batch = SSHSparkOperator(
-        task_id             ='csv_ingestion',
-        ssh_conn_id         ='sparkSSH',
-        application_path    =''
+        task_id                 ='csv_ingestion',
+        ssh_conn_id             ='sparkSSH',
+        application_path        ='/spark/jobs/ingest.py',
+        python_args             ="--object-path {{ var.value.QUEUED_BUCKET }}/{{ ti.xcom_pull(task_ids='pick_minio_object', key='current_csv').split('/')[0] }}"
     )
-        
-    @task_group(group_id='Audit_ingested_data')
-    def source_batch_validation_group():
-        # 2.1 Validate ingested data with soda
-        validate_batch = SSHSodaOperator(
-            task_id             ='ingested_batch_validation',
-            ssh_conn_id         ='sodaSSH',
-            check_path          ='',
-            do_xcom_push        =True
-        )
-        
-        # 2.2 Check validation result
-        @task.branch(task_id="batch_validation_branching")
-        def check_source_failures(**kwargs):
-            import re
-            soda_output = kwargs['ti'].xcom_pull(task_ids='ingested_batch_validation')
-            if re.search(r'Oops!\s+\d+\sfailures', soda_output, re.MULTILINE):
-                return 'send_audit_failure_email'
-            else:
-                return 'transform_write'
-        validate_batch >> check_source_failures()
-      
-    # 3.1 Do something on error
-    send_audit_failure_email = EmptyOperator(
-        task_id             ='send_audit_failure_email'
-    )
-    
-    # 3.2 Clean and transform
-    clean_batch = SSHSparkOperator(
-        task_id             ='transform_write',
-        ssh_conn_id         ='sparkSSH',
-        application_path    =''
-    )
-    
-    @task_group(group_id='Audit_before_publishing')
-    def transformed_validation_group():
-        # 4.1 Validate transformed data with soda
-        validate_cleaned = SSHSodaOperator(
-            task_id             ='validate_cleaned_data',
-            ssh_conn_id         ='sodaSSH',
-            check_path          ='',
-            do_xcom_push        =True
-        )
 
-        # 4.2 check validation result
-        @task.branch(task_id="cleaned_batch_validation_branching")
-        def check_cleaned_failures(**kwargs):
-            import re
-            soda_output = kwargs['ti'].xcom_pull(task_ids='validate_cleaned_data')
-            if re.search(r'Oops!\s+\d+\sfailures', soda_output, re.MULTILINE):
-                return 'send_audit_failure_email'
-            else:
-                return 'publish'
-        validate_cleaned >> check_cleaned_failures()
-    
-    
-    # 5. Publish data on success
-    merge_silver = SSHSparkOperator(
-        task_id             ='publish',
-        ssh_conn_id         ='sparkSSH',
-        application_path    =''
+    # 1.2 Validate ingested data with soda
+    validate_batch = SSHSparkOperator(
+        task_id             ='Audit_bronze_batch',
+        ssh_conn_id         ='sodaSSH',
+        application_path    ='/soda/checks/bronz_amazon_sales.py',
     )
     
-    # 6. Move processed file
+    # 1.3 Do something on error
+    send_audit_failure_email_bronze = EmptyOperator(
+        task_id                 ='send_bronze_audit_failure_email',
+        trigger_rule            ="all_failed",
+    )
+   
+    ##############################################################################
+    ##############################################################################
+    ##############################################################################
+   
+    # 2.1 Clean and enrich
+    clean_batch = SSHSparkOperator(
+        task_id                 ='clean_and_load_to_silver',
+        ssh_conn_id             ='sparkSSH',
+        application_path        ='/spark/jobs/cleansing.py'
+    )
+    
+    # 2.2 Validate data with soda
+    validate_cleaned = SSHSparkOperator(
+        task_id             ='Audit_cleaned_batch',
+        ssh_conn_id         ='sodaSSH',
+        application_path    ='/soda/checks/silver_amazon_sales.py',
+    )
+    
+    # 2.3 Do something on error
+    send_audit_failure_email_silver = EmptyOperator(
+        task_id                 ='send_silver_audit_failure_email',
+        trigger_rule            ="all_failed",
+    ) 
+    
+    ##############################################################################
+    ##############################################################################
+    ##############################################################################
+    
+    # 3.1 load data on success
+    load_to_silver = SSHSparkOperator(
+        task_id                 ='load',
+        ssh_conn_id             ='sparkSSH',
+        application_path        ='/spark/jobs/load.py'
+    )
+    
+    # 3.2 merge and publish data on success
+    merge_and_publish = SSHSparkOperator(
+        task_id                 ='merge_publish',
+        ssh_conn_id             ='sparkSSH',
+        application_path        ='/spark/jobs/merge_into_main.py'
+    )
+    
+    ##############################################################################
+    ##############################################################################
+    ##############################################################################
+    
+    # 4. Move processed file
     @task.python(task_id='move_processed_file')
     def move_processed(**kwargs):
         minio_hook = MinIOHook(
-            endpoint='your-minio-endpoint', 
-            access_key='your-access-key', 
-            secret_key='your-secret-key'
+            endpoint            =Variable.get("MINIO_END_POINT"), 
+            access_key          =Variable.get("MINIO_ACCESS_KEY"),
+            secret_key          =Variable.get("MINIO_SECRET_KEY"),
         )
         
-        last_obj = kwargs['ti'].xcom_pull(task_ids='pick_minio_object')
-        if last_obj and last_obj.count('/') > 0:
-            last_obj = last_obj.split('/')[0]
+        last_obj_name = kwargs['ti'].xcom_pull(task_ids='pick_minio_object')
+        if last_obj_name and last_obj_name.count('/') > 0:
+            last_obj_name = last_obj_name.split('/')[0]
         
         minio_hook.move_object(
-            source_bucket='source-bucket',
-            target_bucket='target-bucket',
-            prefix='your-prefix/'
+            source_bucket       =Variable.get("QUEUED_BUCKET"),
+            target_bucket       =Variable.get("PROCESSED_BUCKET"),
+            prefix              =last_obj_name
         )
     
-    # 7. Rerun untill process all files
+    ##############################################################################
+    ##############################################################################
+    ##############################################################################
+    
+    # 5. Rerun untill process all files
     rerun = TriggerDagRunOperator(
         task_id = 'rerun',
         trigger_dag_id="Write-Audit-Publish"
     )
 
     pick_minio_object() >> [stop, ingest_batch]
-    ingest_batch >> source_batch_validation_group() >> [send_audit_failure_email, clean_batch]
-    clean_batch >> transformed_validation_group() >> [send_audit_failure_email, merge_silver]
-    merge_silver >> move_processed() >> rerun
+    ingest_batch >> validate_batch >> [send_audit_failure_email_bronze, clean_batch]
+    clean_batch >> validate_cleaned >> [send_audit_failure_email_silver, load_to_silver]
+    load_to_silver >> merge_and_publish >> move_processed() >> rerun
 
 wap()
