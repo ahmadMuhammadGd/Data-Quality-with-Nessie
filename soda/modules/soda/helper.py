@@ -32,7 +32,7 @@ def check(
 
         scan.execute()
 
-        return scan.get_logs_text()
+        logs = scan.get_logs_text()
         
         if log_file_path:
             os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
@@ -45,9 +45,11 @@ def check(
             with open(report_file_path, 'w') as report_file:
                 report_file.write(report)
 
-        if stop_on_fail and scan.has_failures():
+        if stop_on_fail and scan.has_check_fails():
             raise RuntimeError("Soda scan failed. Check logs for details.")
 
+        return logs
+    
     except Exception as e:
         print(f"An error occurred during the Soda scan: {e}")
         if stop_on_fail:
