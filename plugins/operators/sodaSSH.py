@@ -18,7 +18,7 @@ class SSHSodaOperator(BaseOperator):
 
     def execute(self, context):
         ssh_command = f"""
-        python {self.check_path}
+        /opt/spark/bin/spark-submit {self.check_path}
         """
         ssh_task = SSHOperator(
             task_id         =f"{self.task_id}_ssh_{uuid.uuid4().hex}",
