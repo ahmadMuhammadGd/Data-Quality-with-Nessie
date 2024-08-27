@@ -15,7 +15,7 @@ class MinIOHook(BaseHook):
             self.endpoint,
             access_key=self.access_key,
             secret_key=self.secret_key,
-            secure=self.secure
+            secure=self.secure,
         )
     
     def move_object(self, source_bucket: str, target_bucket: str, prefix: str):
@@ -56,7 +56,12 @@ class MinIOHook(BaseHook):
         Raises:
             ValueError: If an invalid strategy is provided.
         """
-        objects = list(self.client.list_objects(bucket_name, prefix=prefix, recursive=True))
+        objects = list(self.client.list_objects(
+            bucket_name, 
+            prefix=prefix, 
+            recursive=True
+            )
+        )
         if not objects:
             return None
         if strategy == 'fifo':
