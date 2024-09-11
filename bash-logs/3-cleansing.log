@@ -1,75 +1,147 @@
-Most recent batch
-+-------------------+----------+--------------------+----------+-------------+------------------+--------+----+--------------+---+--------+--------------------+--------------+----------------+----------------+------------+-----+------------+----+--------+--------------+
-|           Order_ID|order_Date|              Status|Fulfilment|Sales_Channel|ship_service_level|Category|Size|Courier_Status|Qty|currency|              Amount|     ship_city|      ship_state|ship_postal_code|ship_country|  B2B|fulfilled_by| New|PendingS|ingestion_date|
-+-------------------+----------+--------------------+----------+-------------+------------------+--------+----+--------------+---+--------+--------------------+--------------+----------------+----------------+------------+-----+------------+----+--------+--------------+
-|402-8288606-4313118|2022-01-04|             Shipped|    Amazon|    Amazon.in|         Expedited|   Shirt|   M|       Shipped|  1|     INR|   516.9989855015194|      BILASPUR|HIMACHAL PRADESH|          174001|          IN|false|        NULL|NULL|    NULL|    2024-08-24|
-|405-3036350-8089120|2022-01-04|             Shipped|    Amazon|    Amazon.in|         Expedited|   Shirt|   M|       Shipped|  1|     INR|   794.9761527705574|     ANKLESHWR|         Gujarat|          393002|          IN|false|        NULL|NULL|    NULL|    2024-08-24|
-|404-1580706-8406729|2022-01-04|             Shipped|    Amazon|    Amazon.in|         Expedited|   Shirt|  XL|       Shipped|  1|     INR|   474.9775639948803|       CHENNAI|      TAMIL NADU|          600028|          IN|false|        NULL|NULL|    NULL|    2024-08-24|
-|404-4388660-6585119|2022-01-04|             Shipped|    Amazon|    Amazon.in|         Expedited| T-shirt|   L|       Shipped|  1|     INR|   1186.017084569087|     HYDERABAD|       TELANGANA|          500050|          IN|false|        NULL|NULL|    NULL|    2024-08-24|
-|407-9815175-7715562|2022-01-04|           Cancelled|  Merchant|    Amazon.in|          Standard| T-shirt|   M|    On the Way|  0|     INR|   872.3500120399416|          UDMA|          KERALA|          671319|          IN|false|   Easy Ship|NULL|    NULL|    2024-08-24|
-|171-4519721-7419566|2022-01-04|Shipped - Deliver...|  Merchant|    Amazon.in|          Standard| T-shirt|  XL|       Shipped|  1|     INR|   816.0325626263244|      GURUGRAM|         HARYANA|          122002|          IN|false|   Easy Ship|NULL|    NULL|    2024-08-24|
-|408-2830412-5001168|2022-01-04|Shipped - Deliver...|  Merchant|    Amazon.in|          Standard|   Shirt|   M|       Shipped|  1|     INR|   499.0060075980319|        PUTTUR|       KARNATAKA|          574203|          IN|false|   Easy Ship|NULL|    NULL|    2024-08-24|
-|406-2932330-3321959|2022-01-04|           Cancelled|    Amazon|    Amazon.in|         Expedited| T-shirt|   S|     Cancelled|  0|    NULL|                NULL|       CHIRAWA|       RAJASTHAN|          333026|          IN|false|        NULL|NULL|    NULL|    2024-08-24|
-|403-3329838-9233131|2022-01-04|             Shipped|    Amazon|    Amazon.in|         Expedited| T-shirt|   M|       Shipped|  1|     INR|   653.9959868395791|       LUCKNOW|   UTTAR PRADESH|          226003|          IN|false|        NULL|NULL|    NULL|    2024-08-24|
-|403-5061524-1069157|2022-01-04|             Shipped|    Amazon|    Amazon.in|         Expedited| T-shirt|  XS|       Shipped|  1|     INR|   1111.936616524575|        BHILAI|    CHHATTISGARH|          490006|          IN|false|        NULL|NULL|    NULL|    2024-08-24|
-|407-2381438-0794755|2022-01-04|           Cancelled|  Merchant|    Amazon.in|          Standard| Blazzer| XXL|    On the Way|  0|     INR|   753.3861767860388|      GURUGRAM|         HARYANA|          122004|          IN|false|   Easy Ship|NULL|    NULL|    2024-08-24|
-|407-9287244-6741956|2022-01-04|             Shipped|    Amazon|    Amazon.in|         Expedited| Blazzer|  XL|       Shipped|  1|     INR|   884.9918157660143|         SURAT|         Gujarat|          395009|          IN|false|        NULL|NULL|    NULL|    2024-08-24|
-|402-6247468-4355542|2022-01-04|Shipped - Deliver...|  Merchant|    Amazon.in|          Standard|   Shirt|   L|       Shipped|  1|     INR|   458.9144711459592|     LAKHIMPUR|   UTTAR PRADESH|          262701|          IN|false|   Easy Ship|NULL|    NULL|    2024-08-24|
-|404-8541183-2625124|2022-01-04|Shipped - Deliver...|  Merchant|    Amazon.in|          Standard| T-shirt|  XL|       Shipped|  1|     INR|   611.9737196812274|        GANJAM|          ODISHA|          761121|          IN|false|   Easy Ship|NULL|    NULL|    2024-08-24|
-|408-2737126-0817167|2022-01-04|             Shipped|    Amazon|    Amazon.in|          Standard|   Shirt|   S|       Shipped| -1|     INR|-0.04737033896577508|     AHMEDABAD|         Gujarat|          382345|          IN|false|        NULL|NULL|    NULL|    2024-08-24|
-|403-1147455-0953128|2022-01-04|             Shipped|    Amazon|    Amazon.in|         Expedited| T-shirt|   M|       Shipped|  1|     INR|  1648.0120845767817|        MUMBAI|     MAHARASHTRA|          400089|          IN|false|        NULL|NULL|    NULL|    2024-08-24|
-|403-5256514-5961111|2022-01-04|           Cancelled|  Merchant|    Amazon.in|          Standard| T-shirt|   S|    On the Way|  0|    NULL|                NULL|        MUMBAI|     MAHARASHTRA|          400078|          IN|false|   Easy Ship|NULL|    NULL|    2024-08-24|
-|405-4273004-7443538|2022-01-04|             Shipped|    Amazon|    Amazon.in|         Expedited|   Shirt|   L|       Shipped|  1|     INR|   353.0136606202708|        PILERU|  ANDHRA PRADESH|          517214|          IN|false|        NULL|NULL|    NULL|    2024-08-24|
-|402-4715238-8520355|2022-01-04|           Cancelled|  Merchant|    Amazon.in|          Standard| T-shirt|   S|    On the Way|  0|     INR|  -681.0324080869824|SRI GANGANAGAR|       RAJASTHAN|          335001|          IN|false|   Easy Ship|NULL|    NULL|    2024-08-24|
-|403-5332667-6713917|2022-01-04|           Cancelled|  Merchant|    Amazon.in|          Standard| T-shirt|   M|    On the Way|  0|     INR|   1278.622271690176|         BHOTA|HIMACHAL PRADESH|          176041|          IN|false|   Easy Ship|NULL|    NULL|    2024-08-24|
-+-------------------+----------+--------------------+----------+-------------+------------------+--------+----+--------------+---+--------+--------------------+--------------+----------------+----------------+------------+-----+------------+----+--------+--------------+
+INFO:root:Successfully loaded `/config/paths.env
+INFO:root:Successfully loaded `/config/minio.env
+INFO:root:Successfully loaded `/config/dremio.env
+INFO:root:Successfully loaded `/config/nessie.env
+INFO:root:Successfully loaded `/config/dwh.env
+INFO:root:`nessie.bronz.amazon_orders` Table:
++-------------------+----------+--------------------+----------+--------------+------------------+--------+----+--------------+---+--------+--------------------+--------------+----------------+----------------+------------+-----+------------+----+--------+-------------------+
+|           Order_ID|Order_Date|        Order_Status|Fulfilment|ORDERS_Channel|ship_service_level|Category|Size|Courier_Status|Qty|Currency|              Amount|     Ship_City|      Ship_State|Ship_Postal_Code|Ship_Country|  B2B|Fulfilled_By| New|PendingS|     Ingestion_Date|
++-------------------+----------+--------------------+----------+--------------+------------------+--------+----+--------------+---+--------+--------------------+--------------+----------------+----------------+------------+-----+------------+----+--------+-------------------+
+|402-8288606-4313118|2022-01-04|             Shipped|    Amazon|     Amazon.in|         Expedited|   Shirt|   M|       Shipped|  1|     INR|   516.9989855015194|      BILASPUR|HIMACHAL PRADESH|          174001|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|405-3036350-8089120|2022-01-04|             Shipped|    Amazon|     Amazon.in|         Expedited|   Shirt|   M|       Shipped|  1|     INR|   794.9761527705574|     ANKLESHWR|         Gujarat|          393002|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|404-1580706-8406729|2022-01-04|             Shipped|    Amazon|     Amazon.in|         Expedited|   Shirt|  XL|       Shipped|  1|     INR|   474.9775639948803|       CHENNAI|      TAMIL NADU|          600028|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|404-4388660-6585119|2022-01-04|             Shipped|    Amazon|     Amazon.in|         Expedited| T-shirt|   L|       Shipped|  1|     INR|   1186.017084569087|     HYDERABAD|       TELANGANA|          500050|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|407-9815175-7715562|2022-01-04|           Cancelled|  Merchant|     Amazon.in|          Standard| T-shirt|   M|    On the Way|  0|     INR|   872.3500120399416|          UDMA|          KERALA|          671319|          IN|false|   Easy Ship|NULL|    NULL|2024-09-03 00:00:00|
+|171-4519721-7419566|2022-01-04|Shipped - Deliver...|  Merchant|     Amazon.in|          Standard| T-shirt|  XL|       Shipped|  1|     INR|   816.0325626263244|      GURUGRAM|         HARYANA|          122002|          IN|false|   Easy Ship|NULL|    NULL|2024-09-03 00:00:00|
+|408-2830412-5001168|2022-01-04|Shipped - Deliver...|  Merchant|     Amazon.in|          Standard|   Shirt|   M|       Shipped|  1|     INR|   499.0060075980319|        PUTTUR|       KARNATAKA|          574203|          IN|false|   Easy Ship|NULL|    NULL|2024-09-03 00:00:00|
+|406-2932330-3321959|2022-01-04|           Cancelled|    Amazon|     Amazon.in|         Expedited| T-shirt|   S|     Cancelled|  0|    NULL|                NULL|       CHIRAWA|       RAJASTHAN|          333026|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|403-3329838-9233131|2022-01-04|             Shipped|    Amazon|     Amazon.in|         Expedited| T-shirt|   M|       Shipped|  1|     INR|   653.9959868395791|       LUCKNOW|   UTTAR PRADESH|          226003|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|403-5061524-1069157|2022-01-04|             Shipped|    Amazon|     Amazon.in|         Expedited| T-shirt|  XS|       Shipped|  1|     INR|   1111.936616524575|        BHILAI|    CHHATTISGARH|          490006|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|407-2381438-0794755|2022-01-04|           Cancelled|  Merchant|     Amazon.in|          Standard| Blazzer| XXL|    On the Way|  0|     INR|   753.3861767860388|      GURUGRAM|         HARYANA|          122004|          IN|false|   Easy Ship|NULL|    NULL|2024-09-03 00:00:00|
+|407-9287244-6741956|2022-01-04|             Shipped|    Amazon|     Amazon.in|         Expedited| Blazzer|  XL|       Shipped|  1|     INR|   884.9918157660143|         SURAT|         Gujarat|          395009|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|402-6247468-4355542|2022-01-04|Shipped - Deliver...|  Merchant|     Amazon.in|          Standard|   Shirt|   L|       Shipped|  1|     INR|   458.9144711459592|     LAKHIMPUR|   UTTAR PRADESH|          262701|          IN|false|   Easy Ship|NULL|    NULL|2024-09-03 00:00:00|
+|404-8541183-2625124|2022-01-04|Shipped - Deliver...|  Merchant|     Amazon.in|          Standard| T-shirt|  XL|       Shipped|  1|     INR|   611.9737196812274|        GANJAM|          ODISHA|          761121|          IN|false|   Easy Ship|NULL|    NULL|2024-09-03 00:00:00|
+|408-2737126-0817167|2022-01-04|             Shipped|    Amazon|     Amazon.in|          Standard|   Shirt|   S|       Shipped| -1|     INR|-0.04737033896577508|     AHMEDABAD|         Gujarat|          382345|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|403-1147455-0953128|2022-01-04|             Shipped|    Amazon|     Amazon.in|         Expedited| T-shirt|   M|       Shipped|  1|     INR|  1648.0120845767817|        MUMBAI|     MAHARASHTRA|          400089|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|403-5256514-5961111|2022-01-04|           Cancelled|  Merchant|     Amazon.in|          Standard| T-shirt|   S|    On the Way|  0|    NULL|                NULL|        MUMBAI|     MAHARASHTRA|          400078|          IN|false|   Easy Ship|NULL|    NULL|2024-09-03 00:00:00|
+|405-4273004-7443538|2022-01-04|             Shipped|    Amazon|     Amazon.in|         Expedited|   Shirt|   L|       Shipped|  1|     INR|   353.0136606202708|        PILERU|  ANDHRA PRADESH|          517214|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|402-4715238-8520355|2022-01-04|           Cancelled|  Merchant|     Amazon.in|          Standard| T-shirt|   S|    On the Way|  0|     INR|  -681.0324080869824|SRI GANGANAGAR|       RAJASTHAN|          335001|          IN|false|   Easy Ship|NULL|    NULL|2024-09-03 00:00:00|
+|403-5332667-6713917|2022-01-04|           Cancelled|  Merchant|     Amazon.in|          Standard| T-shirt|   M|    On the Way|  0|     INR|   1278.622271690176|         BHOTA|HIMACHAL PRADESH|          176041|          IN|false|   Easy Ship|NULL|    NULL|2024-09-03 00:00:00|
++-------------------+----------+--------------------+----------+--------------+------------------+--------+----+--------------+---+--------+--------------------+--------------+----------------+----------------+------------+-----+------------+----+--------+-------------------+
 only showing top 20 rows
 
-STAGE 1: cleaned patch
-source df: 26
-stage1: cleaned_df: 16
+INFO:root:Most Recent Batch
++-------------------+----------+--------------------+----------+--------------+------------------+--------+----+--------------+---+--------+--------------------+--------------+----------------+----------------+------------+-----+------------+----+--------+-------------------+
+|           Order_ID|Order_Date|        Order_Status|Fulfilment|ORDERS_Channel|ship_service_level|Category|Size|Courier_Status|Qty|Currency|              Amount|     Ship_City|      Ship_State|Ship_Postal_Code|Ship_Country|  B2B|Fulfilled_By| New|PendingS|     Ingestion_Date|
++-------------------+----------+--------------------+----------+--------------+------------------+--------+----+--------------+---+--------+--------------------+--------------+----------------+----------------+------------+-----+------------+----+--------+-------------------+
+|402-8288606-4313118|2022-01-04|             Shipped|    Amazon|     Amazon.in|         Expedited|   Shirt|   M|       Shipped|  1|     INR|   516.9989855015194|      BILASPUR|HIMACHAL PRADESH|          174001|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|405-3036350-8089120|2022-01-04|             Shipped|    Amazon|     Amazon.in|         Expedited|   Shirt|   M|       Shipped|  1|     INR|   794.9761527705574|     ANKLESHWR|         Gujarat|          393002|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|404-1580706-8406729|2022-01-04|             Shipped|    Amazon|     Amazon.in|         Expedited|   Shirt|  XL|       Shipped|  1|     INR|   474.9775639948803|       CHENNAI|      TAMIL NADU|          600028|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|404-4388660-6585119|2022-01-04|             Shipped|    Amazon|     Amazon.in|         Expedited| T-shirt|   L|       Shipped|  1|     INR|   1186.017084569087|     HYDERABAD|       TELANGANA|          500050|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|407-9815175-7715562|2022-01-04|           Cancelled|  Merchant|     Amazon.in|          Standard| T-shirt|   M|    On the Way|  0|     INR|   872.3500120399416|          UDMA|          KERALA|          671319|          IN|false|   Easy Ship|NULL|    NULL|2024-09-03 00:00:00|
+|171-4519721-7419566|2022-01-04|Shipped - Deliver...|  Merchant|     Amazon.in|          Standard| T-shirt|  XL|       Shipped|  1|     INR|   816.0325626263244|      GURUGRAM|         HARYANA|          122002|          IN|false|   Easy Ship|NULL|    NULL|2024-09-03 00:00:00|
+|408-2830412-5001168|2022-01-04|Shipped - Deliver...|  Merchant|     Amazon.in|          Standard|   Shirt|   M|       Shipped|  1|     INR|   499.0060075980319|        PUTTUR|       KARNATAKA|          574203|          IN|false|   Easy Ship|NULL|    NULL|2024-09-03 00:00:00|
+|406-2932330-3321959|2022-01-04|           Cancelled|    Amazon|     Amazon.in|         Expedited| T-shirt|   S|     Cancelled|  0|    NULL|                NULL|       CHIRAWA|       RAJASTHAN|          333026|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|403-3329838-9233131|2022-01-04|             Shipped|    Amazon|     Amazon.in|         Expedited| T-shirt|   M|       Shipped|  1|     INR|   653.9959868395791|       LUCKNOW|   UTTAR PRADESH|          226003|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|403-5061524-1069157|2022-01-04|             Shipped|    Amazon|     Amazon.in|         Expedited| T-shirt|  XS|       Shipped|  1|     INR|   1111.936616524575|        BHILAI|    CHHATTISGARH|          490006|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|407-2381438-0794755|2022-01-04|           Cancelled|  Merchant|     Amazon.in|          Standard| Blazzer| XXL|    On the Way|  0|     INR|   753.3861767860388|      GURUGRAM|         HARYANA|          122004|          IN|false|   Easy Ship|NULL|    NULL|2024-09-03 00:00:00|
+|407-9287244-6741956|2022-01-04|             Shipped|    Amazon|     Amazon.in|         Expedited| Blazzer|  XL|       Shipped|  1|     INR|   884.9918157660143|         SURAT|         Gujarat|          395009|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|402-6247468-4355542|2022-01-04|Shipped - Deliver...|  Merchant|     Amazon.in|          Standard|   Shirt|   L|       Shipped|  1|     INR|   458.9144711459592|     LAKHIMPUR|   UTTAR PRADESH|          262701|          IN|false|   Easy Ship|NULL|    NULL|2024-09-03 00:00:00|
+|404-8541183-2625124|2022-01-04|Shipped - Deliver...|  Merchant|     Amazon.in|          Standard| T-shirt|  XL|       Shipped|  1|     INR|   611.9737196812274|        GANJAM|          ODISHA|          761121|          IN|false|   Easy Ship|NULL|    NULL|2024-09-03 00:00:00|
+|408-2737126-0817167|2022-01-04|             Shipped|    Amazon|     Amazon.in|          Standard|   Shirt|   S|       Shipped| -1|     INR|-0.04737033896577508|     AHMEDABAD|         Gujarat|          382345|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|403-1147455-0953128|2022-01-04|             Shipped|    Amazon|     Amazon.in|         Expedited| T-shirt|   M|       Shipped|  1|     INR|  1648.0120845767817|        MUMBAI|     MAHARASHTRA|          400089|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|403-5256514-5961111|2022-01-04|           Cancelled|  Merchant|     Amazon.in|          Standard| T-shirt|   S|    On the Way|  0|    NULL|                NULL|        MUMBAI|     MAHARASHTRA|          400078|          IN|false|   Easy Ship|NULL|    NULL|2024-09-03 00:00:00|
+|405-4273004-7443538|2022-01-04|             Shipped|    Amazon|     Amazon.in|         Expedited|   Shirt|   L|       Shipped|  1|     INR|   353.0136606202708|        PILERU|  ANDHRA PRADESH|          517214|          IN|false|        NULL|NULL|    NULL|2024-09-03 00:00:00|
+|402-4715238-8520355|2022-01-04|           Cancelled|  Merchant|     Amazon.in|          Standard| T-shirt|   S|    On the Way|  0|     INR|  -681.0324080869824|SRI GANGANAGAR|       RAJASTHAN|          335001|          IN|false|   Easy Ship|NULL|    NULL|2024-09-03 00:00:00|
+|403-5332667-6713917|2022-01-04|           Cancelled|  Merchant|     Amazon.in|          Standard| T-shirt|   M|    On the Way|  0|     INR|   1278.622271690176|         BHOTA|HIMACHAL PRADESH|          176041|          IN|false|   Easy Ship|NULL|    NULL|2024-09-03 00:00:00|
++-------------------+----------+--------------------+----------+--------------+------------------+--------+----+--------------+---+--------+--------------------+--------------+----------------+----------------+------------+-----+------------+----+--------+-------------------+
+only showing top 20 rows
 
+INFO:root:STAGE 1: cleaned patch
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/logging/__init__.py", line 1100, in emit
+    msg = self.format(record)
+  File "/usr/local/lib/python3.10/logging/__init__.py", line 943, in format
+    return fmt.format(record)
+  File "/usr/local/lib/python3.10/logging/__init__.py", line 678, in format
+    record.message = record.getMessage()
+  File "/usr/local/lib/python3.10/logging/__init__.py", line 368, in getMessage
+    msg = msg % self.args
+TypeError: not all arguments converted during string formatting
+Call stack:
+  File "/spark-container/spark/jobs/cleansing.py", line 92, in <module>
+    logging.info('source df:', df.count())
+Message: 'source df:'
+Arguments: (26,)
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/logging/__init__.py", line 1100, in emit
+    msg = self.format(record)
+  File "/usr/local/lib/python3.10/logging/__init__.py", line 943, in format
+    return fmt.format(record)
+  File "/usr/local/lib/python3.10/logging/__init__.py", line 678, in format
+    record.message = record.getMessage()
+  File "/usr/local/lib/python3.10/logging/__init__.py", line 368, in getMessage
+    msg = msg % self.args
+TypeError: not all arguments converted during string formatting
+Call stack:
+  File "/spark-container/spark/jobs/cleansing.py", line 93, in <module>
+    logging.info('stage1: cleaned_df:', clean_df.count())
+Message: 'stage1: cleaned_df:'
+Arguments: (16,)
+INFO:root:STAGE 2: Standarize string columns and fix typos
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/logging/__init__.py", line 1100, in emit
+    msg = self.format(record)
+  File "/usr/local/lib/python3.10/logging/__init__.py", line 943, in format
+    return fmt.format(record)
+  File "/usr/local/lib/python3.10/logging/__init__.py", line 678, in format
+    record.message = record.getMessage()
+  File "/usr/local/lib/python3.10/logging/__init__.py", line 368, in getMessage
+    msg = msg % self.args
+TypeError: not all arguments converted during string formatting
+Call stack:
+  File "/spark-container/spark/jobs/cleansing.py", line 136, in <module>
+    logging.info('Source df:', df.count())
+Message: 'Source df:'
+Arguments: (26,)
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/logging/__init__.py", line 1100, in emit
+    msg = self.format(record)
+  File "/usr/local/lib/python3.10/logging/__init__.py", line 943, in format
+    return fmt.format(record)
+  File "/usr/local/lib/python3.10/logging/__init__.py", line 678, in format
+    record.message = record.getMessage()
+  File "/usr/local/lib/python3.10/logging/__init__.py", line 368, in getMessage
+    msg = msg % self.args
+TypeError: not all arguments converted during string formatting
+Call stack:
+  File "/spark-container/spark/jobs/cleansing.py", line 137, in <module>
+    logging.info('Stage2: cleaned_df:', clean_df.count())
+Message: 'Stage2: cleaned_df:'
+Arguments: (16,)
++-------------------+----------+--------------------+----------+--------------+------------------+--------+----+--------------+---+--------+------------------+---------+----------------+----------------+------------+-----+-------------+-------------+-------------+-------------------+
+|           Order_ID|Order_Date|        Order_Status|Fulfilment|ORDERS_Channel|ship_service_level|Category|Size|Courier_Status|Qty|Currency|            Amount|Ship_City|      Ship_State|Ship_Postal_Code|Ship_Country|  B2B| Fulfilled_By|          New|     PendingS|     Ingestion_Date|
++-------------------+----------+--------------------+----------+--------------+------------------+--------+----+--------------+---+--------+------------------+---------+----------------+----------------+------------+-----+-------------+-------------+-------------+-------------------+
+|171-4519721-7419566|2022-01-04|Shipped - deliver...|  Merchant|     Amazon.in|          Standard| T-shirt|   X|       Shipped|  1|      In| 816.0325626263244| Gurugram|         Haryana|          122002|          In|false|    Easy ship|Invalid_value|INVALID_VALUE|2024-09-03 00:00:00|
+|402-6247468-4355542|2022-01-04|Shipped - deliver...|  Merchant|     Amazon.in|          Standard|   Shirt|   L|       Shipped|  1|      In| 458.9144711459592|Lakhimpur|   Uttar pradesh|          262701|          In|false|    Easy ship|Invalid_value|INVALID_VALUE|2024-09-03 00:00:00|
+|402-8288606-4313118|2022-01-04|             Shipped|    Amazon|     Amazon.in|          Expected|   Shirt|   M|       Shipped|  1|      In| 516.9989855015194| Bilaspur|Himachal pradesh|          174001|          In|false|Invalid_value|Invalid_value|INVALID_VALUE|2024-09-03 00:00:00|
+|403-1147455-0953128|2022-01-04|             Shipped|    Amazon|     Amazon.in|          Expected| T-shirt|   M|       Shipped|  1|      In|1648.0120845767817|   Mumbai|     Maharashtra|          400089|          In|false|Invalid_value|Invalid_value|INVALID_VALUE|2024-09-03 00:00:00|
+|403-3329838-9233131|2022-01-04|             Shipped|    Amazon|     Amazon.in|          Expected| T-shirt|   M|       Shipped|  1|      In| 653.9959868395791|  Lucknow|   Uttar pradesh|          226003|          In|false|Invalid_value|Invalid_value|INVALID_VALUE|2024-09-03 00:00:00|
+|403-5061524-1069157|2022-01-04|             Shipped|    Amazon|     Amazon.in|          Expected| T-shirt|  Is|       Shipped|  1|      In| 1111.936616524575|    Chili|    Chhattisgarh|          490006|          In|false|Invalid_value|Invalid_value|INVALID_VALUE|2024-09-03 00:00:00|
+|404-0666105-3601963|2022-01-04|Shipped - deliver...|  Merchant|     Amazon.in|          Standard|   Shirt| 3xl|       Shipped|  1|      In| 517.0061174701829| Gurugram|         Haryana|          122004|          In|false|    Easy ship|Invalid_value|INVALID_VALUE|2024-09-03 00:00:00|
+|404-1580706-8406729|2022-01-04|             Shipped|    Amazon|     Amazon.in|          Expected|   Shirt|   X|       Shipped|  1|      In| 474.9775639948803|  Chennai|      Tamil nadu|          600028|          In|false|Invalid_value|Invalid_value|INVALID_VALUE|2024-09-03 00:00:00|
+|404-4388660-6585119|2022-01-04|             Shipped|    Amazon|     Amazon.in|          Expected| T-shirt|   L|       Shipped|  1|      In| 1186.017084569087|Hyderabad|       Telangana|          500050|          In|false|Invalid_value|Invalid_value|INVALID_VALUE|2024-09-03 00:00:00|
+|404-8541183-2625124|2022-01-04|Shipped - deliver...|  Merchant|     Amazon.in|          Standard| T-shirt|   X|       Shipped|  1|      In| 611.9737196812274|    Hanja|          Odisha|          761121|          In|false|    Easy ship|Invalid_value|INVALID_VALUE|2024-09-03 00:00:00|
+|404-9948787-3166729|2022-01-04|             Shipped|    Amazon|     Amazon.in|          Expected| Bladder|   X|       Shipped|  1|      In| 744.0668805712354|Ghaziabad|   Uttar pradesh|          201009|          In|false|Invalid_value|Invalid_value|INVALID_VALUE|2024-09-03 00:00:00|
+|405-0892389-6639551|2022-01-04|             Shipped|    Amazon|     Amazon.in|          Expected| T-shirt|  Is|       Shipped|  1|      In| 455.0618502998357|Bengaluru|       Karnataka|          560076|          In|false|Invalid_value|Invalid_value|INVALID_VALUE|2024-09-03 00:00:00|
+|405-3036350-8089120|2022-01-04|             Shipped|    Amazon|     Amazon.in|          Expected|   Shirt|   M|       Shipped|  1|      In| 794.9761527705574|Ankleshwr|         Gujarat|          393002|          In|false|Invalid_value|Invalid_value|INVALID_VALUE|2024-09-03 00:00:00|
+|405-4273004-7443538|2022-01-04|             Shipped|    Amazon|     Amazon.in|          Expected|   Shirt|   L|       Shipped|  1|      In| 353.0136606202708|     Peru|  Andhra pradesh|          517214|          In|false|Invalid_value|Invalid_value|INVALID_VALUE|2024-09-03 00:00:00|
+|407-9287244-6741956|2022-01-04|             Shipped|    Amazon|     Amazon.in|          Expected| Bladder|   X|       Shipped|  1|      In| 884.9918157660143|    Start|         Gujarat|          395009|          In|false|Invalid_value|Invalid_value|INVALID_VALUE|2024-09-03 00:00:00|
+|408-2830412-5001168|2022-01-04|Shipped - deliver...|  Merchant|     Amazon.in|          Standard|   Shirt|   M|       Shipped|  1|      In| 499.0060075980319|   Potter|       Karnataka|          574203|          In|false|    Easy ship|Invalid_value|INVALID_VALUE|2024-09-03 00:00:00|
++-------------------+----------+--------------------+----------+--------------+------------------+--------+----+--------------+---+--------+------------------+---------+----------------+----------------+------------+-----+-------------+-------------+-------------+-------------------+
 
-
-STAGE2 query:
-Create or replace a temporary table in Iceberg format with the cleaned data.
-- Select columns from `cleaned_batch`, rounding 'Amount' values to 2 decimal places.
-- Filter rows where column values match entries in corresponding reference tables.
-
- 
-    CREATE OR REPLACE TABLE nessie.db.silver_amazon_orders_temp
-    USING ICEBERG AS
-    SELECT
-        src.Order_ID, src.order_Date, src.Status, src.Fulfilment, src.Sales_Channel, src.ship_service_level, src.Category, src.Size, src.Courier_Status, src.Qty, src.currency, ROUND(src.Amount, 2) AS Amount, src.ship_city, src.ship_state, src.ship_postal_code, src.ship_country, src.B2B, src.fulfilled_by, src.New, src.PendingS, src.ingestion_date
-    FROM 
-        cleaned_batch AS src
-    WHERE
-        src.Sales_Channel IN (
-                SELECT 
-                    Sales_Channel
-                FROM
-                    nessie.keys.Sales_Channel
-            ) AND src.Status IN (
-                SELECT 
-                    Status
-                FROM
-                    nessie.keys.Status
-            ) AND src.Category IN (
-                SELECT 
-                    Category
-                FROM
-                    nessie.keys.Category
-            ) AND src.Fulfilment IN (
-                SELECT 
-                    Fulfilment
-                FROM
-                    nessie.keys.Fulfilment
-            )
-    
-
-
-STAGE 2: cleaned patch
-Source df: 26
-Stage1: cleaned_df: 16
-Stage2: cleaned_df: 16
 INFO:py4j.clientserver:Closing down clientserver connection

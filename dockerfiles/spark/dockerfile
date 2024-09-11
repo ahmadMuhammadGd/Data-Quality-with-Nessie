@@ -16,21 +16,33 @@
 # syntax=docker/dockerfile:1
 FROM python:3.10-bullseye
 
+
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    curl \
-    unzip \
-    openssh-server \
-    sudo \
-    openjdk-11-jdk && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+apt-get install -y --no-install-recommends \
+curl \
+unzip \
+openssh-server \
+sudo \
+openjdk-11-jdk && \
+apt-get clean && \
+rm -rf /var/lib/apt/lists/*
 
 # Optional env variables
 ENV SPARK_HOME=${SPARK_HOME:-"/opt/spark"}
 ENV PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9.7-src.zip:$PYTHONPATH
 
+RUN useradd --uid 1001 --create-home --shell /bin/bash --user-group me && \
+echo 'me:changeme' | chpasswd && \
+echo 'me ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/me
+
+ENV SPARK_HOME=${SPARK_HOME:-"/opt/spark"}
+ENV PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9.7-src.zip:$PYTHONPATH
 WORKDIR ${SPARK_HOME}
+
+USER root
+RUN chown -R me:me /home
+RUN chown -R me:me $SPARK_HOME
+USER me
 
 ENV SPARK_VERSION=3.5.2
 ENV SPARK_MAJOR_VERSION=3.5
@@ -64,17 +76,10 @@ ENV PATH="/opt/spark/sbin:/opt/spark/bin:${PATH}"
 RUN chmod u+x /opt/spark/sbin/* && \
     chmod u+x /opt/spark/bin/*
 
-    
-# SSH confiurations
-RUN useradd --uid 1001 --create-home --shell /bin/bash --user-group me && \
-echo 'me:changeme' | chpasswd && \
-echo 'me ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/me
-RUN chown -R me:me /opt/spark
-
-
 COPY dockerfiles/spark/entrypoint.sh .
-RUN chmod +x ${SPARK_HOME}/entrypoint.sh
-
+USER root
+RUN chmod +x $SPARK_HOME/entrypoint.sh
+USER me
 COPY dockerfiles/spark/requirements.txt .
 RUN pip install -r requirements.txt
 ENTRYPOINT ["./entrypoint.sh"]

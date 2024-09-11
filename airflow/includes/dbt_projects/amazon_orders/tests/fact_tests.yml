@@ -1,0 +1,65 @@
+version: 2
+
+models:
+  - name: fact_amazon_orders  
+    description: "Fact table containing orders and their corresponding dimension IDs"
+    columns:
+      - name: order_id
+        description: "Unique order identifier"
+        tests:
+          - unique
+          - not_null
+
+      - name: date_id
+        description: "Foreign key to the date dimension"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('date_dim')
+              field: id
+
+      - name: currency_id
+        description: "Foreign key to the currency dimension"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('currency_dim')
+              field: id
+
+      - name: location_id
+        description: "Foreign key to the location dimension"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('location_dim')
+              field: id
+
+      - name: product_id
+        description: "Foreign key to the product dimension"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('product_dim')
+              field: id
+
+      - name: shipping_id
+        description: "Foreign key to the shipping dimension"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('shipping_dim')
+              field: id
+
+      - name: quantity
+        description: "Quantity of products ordered"
+        tests:
+          - not_null
+          - test_type: accepted_values
+            values: ['>=0']
+
+      - name: amount
+        description: "Monetary amount of the order"
+        tests:
+          - not_null
+          - test_type: accepted_values
+            values: ['>=0.00']

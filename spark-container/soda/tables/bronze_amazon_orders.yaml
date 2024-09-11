@@ -1,0 +1,48 @@
+checks for bronze_amazon_orders:
+  - schema:
+      fail:
+        when required column missing:
+          - Order_ID
+          - Order_Date
+          - Qty
+          - Amount
+
+  - row_count > 0
+
+  - missing_percent(ingestion_date):
+      fail: when > 0%
+
+  - duplicate_count(Order_ID, Category, Order_Date, Amount):
+      warn: when > 0
+
+  - missing_percent(Order_ID):
+      fail: when > 10%
+      warn: when > 5%
+      
+  - missing_percent(Amount):
+      warn: when > 10%
+
+  - missing_percent(Qty):
+      warn: when > 10%
+
+  - min(Amount):
+      warn: when < 0
+
+  - min(Qty):
+      warn: when < 1
+
+  - invalid_percent(Order_Date):
+      fail: when > 10%
+      valid format: date inverse
+  
+  - missing_percent(Order_Status):
+      warn: when > 10%
+  
+  - missing_percent(Courier_Status):
+      warn: when > 10%
+
+  - missing_percent(ORDERS_Channel):
+      warn: when > 10%
+
+  - missing_percent(ship_country):
+      warn: when > 5%

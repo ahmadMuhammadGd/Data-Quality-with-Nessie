@@ -2,7 +2,7 @@
 
 This project demonstrates a data quality pipeline using Nessie for managing data versioning and validation.
 
-- **Dataset**: For more information about the dataset used in this project, [click here](https://www.kaggle.com/datasets/arpit2712/amazonsalesreport?resource=download).
+- **Dataset**: For more information about the dataset used in this project, [click here](https://www.kaggle.com/datasets/arpit2712/amazonORDERSreport?resource=download).
 - **Batch Creation**: Batches were created using `./utils/sampler.py`, which samples and prepares the data for processing.
   - `sampled_data_1` contains clean data, while `sampled_data_2` contains corrupted data.
 - **bash-logs**: To follow the pipeline process, check the log files.

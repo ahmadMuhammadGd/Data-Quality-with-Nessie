@@ -1,52 +1,27 @@
-Namespaces .. done
-db tables .. done
-keys_list: ['/unique_keys/Sales_Channel.csv/', '/unique_keys/Status.csv/', '/unique_keys/Category.csv/', '/unique_keys/Fulfilment.csv/']
-+-------------+
-|Sales_Channel|
-+-------------+
-|   Non-Amazon|
-|    Amazon.in|
-+-------------+
-
-+--------------------+
-|              Status|
-+--------------------+
-|             Shipped|
-|Shipped - Lost in...|
-|Shipped - Deliver...|
-+--------------------+
-
-+--------+
-|Category|
-+--------+
-| T-shirt|
-| Blazzer|
-|Trousers|
-+--------+
-
-+----------+
-|Fulfilment|
-+----------+
-|  Merchant|
-|    Amazon|
-+----------+
-
-+---------+--------------------+-----------+
-|namespace|           tableName|isTemporary|
-+---------+--------------------+-----------+
-|       db|bronze_amazon_orders|      false|
-|       db|silver_amazon_orders|      false|
-|     keys|            Category|      false|
-|     keys|          Fulfilment|      false|
-|     keys|       Sales_Channel|      false|
-|     keys|              Status|      false|
-+---------+--------------------+-----------+
-
-+-------+--------+--------------------+
-|refType|    name|                hash|
-+-------+--------+--------------------+
-| Branch|    main|eee3c807f99de4890...|
-| Branch|validate|2e1d48ff147dee3df...|
-+-------+--------+--------------------+
+INFO:root:Successfully loaded `/config/paths.env
+INFO:root:Successfully loaded `/config/minio.env
+INFO:root:Successfully loaded `/config/dremio.env
+INFO:root:Successfully loaded `/config/nessie.env
+INFO:root:Successfully loaded `/config/dwh.env
+INFO:root:Creating "nessie.pipeline" namespace
+INFO:root:Namespace"nessie.pipeline": Done ..!
+INFO:root:Creating "nessie.bronz" namespace
+INFO:root:Namespace"nessie.bronz": Done ..!
+INFO:root:Creating "nessie.silver" namespace
+INFO:root:Namespace"nessie.silver": Done ..!
+INFO:root:Creating "nessie.gold" namespace
+INFO:root:Namespace"nessie.gold": Done ..!
+INFO:root:***********************************
+INFO:root:Creating "main" nessie branch ..
+INFO:root:Branch "main": Done ..!
+INFO:root:***********************************
+INFO:root:Summary:
+INFO:root:Tables in branch: main
++---------+-------------+-----------+
+|namespace|    tableName|isTemporary|
++---------+-------------+-----------+
+|    bronz|amazon_orders|      false|
+|   silver|amazon_orders|      false|
++---------+-------------+-----------+
 
 INFO:py4j.clientserver:Closing down clientserver connection
