@@ -115,7 +115,7 @@ try:
                 FROM
                     {NESSIE_CATALOG_NAME}.{BRONZE_NAMESPACE}.{AMAZON_ORDERS_TABLE} AS bronze
                 WHERE 
-                    bronze.order_date >= TIMESTAMP \'{min_order_date_in_batch}\'
+                    bronze.order_date >= TIMESTAMP ('{min_order_date_in_batch}')
                 )
     """)
     
@@ -123,14 +123,15 @@ try:
     df_batch_count = df_batch.count()
     
     logging.info(f"{df_batch_count} rows should be ingested into Bronze layer")
-    
+    df_batch.show()
+
     if df_batch_count != 0:
         df_batch.createOrReplaceTempView('df_batch')
         spark.sql(f"""
             INSERT INTO { NESSIE_CATALOG_NAME }.{ BRONZE_NAMESPACE }.{ AMAZON_ORDERS_TABLE }
             SELECT
                 *,
-                CAST(\'{ingestion_timestamp}\' AS TIMESTAMP) AS ingestion_date
+                DATE_FORMATE(CAST('{ingestion_timestamp}' AS TIMESTAMP), 'yyyy-MM-dd HH:mm:ss') AS ingestion_date
             FROM ingested_batch_view 
         """)
     

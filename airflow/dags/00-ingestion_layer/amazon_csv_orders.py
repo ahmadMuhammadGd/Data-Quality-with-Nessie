@@ -51,9 +51,15 @@ def ingest():
             nessie_branch_prefex = os.getenv("BRANCH_AMAZON_ORDERS_PIPELINE_PREFEX")
             
             # Push values to XCom for further tasks
-            kwargs['ti'].xcom_push(key='current_csv'    , value=object_name.split('/')[0])
-            kwargs['ti'].xcom_push(key='timestamp'      , value=datetime.now().strftime('%Y%m%d_%H%M%S'))
-            kwargs['ti'].xcom_push(key='nessie_branch'  , value=f'{nessie_branch_prefex}_{(object_name.split('/')[0]).replace('.csv', '')}')
+            current_csv_name = object_name.split('/')[0]
+            
+            timestamp = datetime.now()
+            curent_timestamp = timestamp.strftime('%Y-%m-%d %H:%M:%S') # for spark SLQ
+            branch_recommended_name = f'{nessie_branch_prefex}_{(object_name.split('/')[0]).replace('.csv', '')}_{str(timestamp.strftime('%Y%m%d%H%M%S'))}'
+            
+            kwargs['ti'].xcom_push(key='current_csv'    , value=current_csv_name)
+            kwargs['ti'].xcom_push(key='timestamp'      , value=curent_timestamp)
+            kwargs['ti'].xcom_push(key='nessie_branch'  , value=branch_recommended_name)
             
             return 'defining_new_branch'
     
@@ -70,7 +76,6 @@ def ingest():
         return: None
         '''
         nessie_branch_new = kwargs['ti'].xcom_pull(key='nessie_branch')
-        inegstion_timestamp = kwargs['ti'].xcom_pull(key='timestamp')
         
         ssh_hook = SSHHook(ssh_conn_id='sparkSSH',)
         with ssh_hook.get_conn() as client:
@@ -79,7 +84,7 @@ def ingest():
             '''
             client.exec_command(
             f'''
-            sed -i "s|^BRANCH_AMAZON_ORDERS_PIPELINE\s*=.*|BRANCH_AMAZON_ORDERS_PIPELINE={nessie_branch_new}_{str(inegstion_timestamp)}|" /config/nessie.env
+            sed -i "s|^BRANCH_AMAZON_ORDERS_PIPELINE\s*=.*|BRANCH_AMAZON_ORDERS_PIPELINE={nessie_branch_new}|" /config/nessie.env
             '''
             )
     
