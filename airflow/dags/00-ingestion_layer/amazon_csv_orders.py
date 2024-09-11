@@ -52,7 +52,7 @@ def ingest():
             
             # Push values to XCom for further tasks
             kwargs['ti'].xcom_push(key='current_csv'    , value=object_name.split('/')[0])
-            kwargs['ti'].xcom_push(key='timestamp'      , value=datetime.now())
+            kwargs['ti'].xcom_push(key='timestamp'      , value=datetime.now().strftime('%Y%m%d_%H%M%S'))
             kwargs['ti'].xcom_push(key='nessie_branch'  , value=f'{nessie_branch_prefex}_{(object_name.split('/')[0]).replace('.csv', '')}')
             
             return 'defining_new_branch'
@@ -70,7 +70,7 @@ def ingest():
         return: None
         '''
         nessie_branch_new = kwargs['ti'].xcom_pull(key='nessie_branch')
-        inegstion_timestamp = kwargs['ti'].xcom_pull(key='timestamp').strftime('%Y%m%d_%H%M%S')
+        inegstion_timestamp = kwargs['ti'].xcom_pull(key='timestamp')
         
         ssh_hook = SSHHook(ssh_conn_id='sparkSSH',)
         with ssh_hook.get_conn() as client:
@@ -88,8 +88,9 @@ def ingest():
         task_id             ='csv_ingestion',
         ssh_conn_id         ='sparkSSH',
         application_path    ='/spark-container/spark/jobs/ingest.py',
-        python_args         ="--object-path {{ var.value.QUEUED_BUCKET }}/{{ ti.xcom_pull(task_ids='pick_minio_object', key='current_csv') }} -t {{ ti.xcom_pull(task_ids='pick_minio_object', key='timestamp') }}"
-    )
+        python_args = 
+            f"--object-path {os.getenv('QUEUED_BUCKET')}/{{{{ ti.xcom_pull(task_ids='pick_minio_object', key='current_csv') }}}} -t {{{{ ti.xcom_pull(task_ids='pick_minio_object', key='timestamp') }}}}"
+        ) 
 
     # 1.2 Validate ingested data with soda
     validate_batch = SSHSparkOperator(
