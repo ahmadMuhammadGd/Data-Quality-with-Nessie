@@ -86,6 +86,7 @@ try:
     # create or replace data lakehouse tables 
     for query in init_sql_queries.split(';'):
         if query.strip():
+            logging.info(query)
             spark.sql(query)           
     
     
