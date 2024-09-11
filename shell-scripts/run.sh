@@ -8,13 +8,28 @@
 # chmod +x minio-setup.sh
 # sh minio-setup.sh
 # initializes Iceberg tables
+
+
+# echo -e "AIRFLOW_UID=$(id -u)" > ./airflow/.env
 set -e 
+export AWS_ACCESS_KEY_ID="admin"
+export AWS_SECRET_ACCESS_KEY="password"
+export AWS_ENDPOINT_URL="http://minio:9000"
+
+docker compose up minio mc nessie -d &&
+docker compose -f ./airflow/airflow-compose.yaml up airflow-init -d  &&
+docker compose -f ./airflow/airflow-compose.yaml up -d  
 
 sh ./shell-scripts/setup/minio-setup.sh
+
+docker compose up spark -d
+
 sh ./shell-scripts/setup/airflow-setup.sh
 
-docker exec spark spark-submit /spark-container/spark/jobs/init_project.py\
+docker exec spark spark-submit /spark-container/spark/jobs/init_project.py \
     > bash-logs/0-init_job.log
+
+
 
 # docker exec spark spark-submit /spark-container/spark/jobs/ingest.py -o queued/sampled_data_2.csv -t 2024-09-03 16:35:47.837268 \\
 #     > bash-logs/1-ingest.log
