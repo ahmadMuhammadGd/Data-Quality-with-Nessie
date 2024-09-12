@@ -1,0 +1,45 @@
+INFO:root:Successfully loaded `/env_variables/paths.env
+INFO:root:Successfully loaded `/env_variables/minio.env
+INFO:root:Successfully loaded `/env_variables/dremio.env
+INFO:root:Successfully loaded `/env_variables/nessie.env
+INFO:root:Successfully loaded `/env_variables/dwh.env
++--------+----------+------------+----------+--------------+------------------+--------+----+--------------+---+--------+------+---------+----------+----------------+------------+---+------------+---+--------+--------------+
+|Order_ID|Order_Date|Order_Status|Fulfilment|ORDERS_Channel|ship_service_level|Category|Size|Courier_Status|Qty|Currency|Amount|Ship_City|Ship_State|Ship_Postal_Code|Ship_Country|B2B|Fulfilled_By|New|PendingS|Ingestion_Date|
++--------+----------+------------+----------+--------------+------------------+--------+----+--------------+---+--------+------+---------+----------+----------------+------------+---+------------+---+--------+--------------+
++--------+----------+------------+----------+--------------+------------------+--------+----+--------------+---+--------+------+---------+----------+----------------+------------+---+------------+---+--------+--------------+
+
+bronz table
+INFO:soda.scan:[14:38:00] Soda Core 3.3.18
+INFO:soda.scan:[14:38:07] Scan summary:
+INFO:soda.scan:[14:38:07] 10/13 checks PASSED: 
+INFO:soda.scan:[14:38:07]     bronze_amazon_orders in bronz_layer
+INFO:soda.scan:[14:38:07]       Schema Check [PASSED]
+INFO:soda.scan:[14:38:07]       duplicate_count(Order_ID, Category, Order_Date, Amount) warn when > 0 [PASSED]
+INFO:soda.scan:[14:38:07]       missing_percent(Order_ID) warn when > 5% fail when > 10% [PASSED]
+INFO:soda.scan:[14:38:07]       missing_percent(Amount) warn when > 10% [PASSED]
+INFO:soda.scan:[14:38:07]       missing_percent(Qty) warn when > 10% [PASSED]
+INFO:soda.scan:[14:38:07]       invalid_percent(Order_Date) fail when > 10% [PASSED]
+INFO:soda.scan:[14:38:07]       missing_percent(Order_Status) warn when > 10% [PASSED]
+INFO:soda.scan:[14:38:07]       missing_percent(Courier_Status) warn when > 10% [PASSED]
+INFO:soda.scan:[14:38:07]       missing_percent(ORDERS_Channel) warn when > 10% [PASSED]
+INFO:soda.scan:[14:38:07]       missing_percent(ship_country) warn when > 5% [PASSED]
+INFO:soda.scan:[14:38:07] 1/13 checks FAILED: 
+INFO:soda.scan:[14:38:07]     bronze_amazon_orders in bronz_layer
+INFO:soda.scan:[14:38:07]       row_count > 0 [FAILED]
+INFO:soda.scan:[14:38:07]         check_value: 0
+INFO:soda.scan:[14:38:07] 2/13 checks NOT EVALUATED: 
+INFO:soda.scan:[14:38:07]     bronze_amazon_orders in bronz_layer
+INFO:soda.scan:[14:38:07]       min(Amount) warn when < 0 [NOT EVALUATED]
+INFO:soda.scan:[14:38:07]         check_value: None
+INFO:soda.scan:[14:38:07]       min(Qty) warn when < 1 [NOT EVALUATED]
+INFO:soda.scan:[14:38:07]         check_value: None
+INFO:soda.scan:[14:38:07] 2 checks not evaluated.
+INFO:soda.scan:[14:38:07] Oops! 1 failures. 0 warnings. 0 errors. 10 pass.
+An error occurred during the Soda scan: Soda scan failed. Check logs for details.
+Traceback (most recent call last):
+  File "/soda/checks/bronz_amazon_sales.py", line 64, in <module>
+    check(
+  File "/soda/modules/soda/helper.py", line 49, in check
+    raise RuntimeError("Soda scan failed. Check logs for details.")
+RuntimeError: Soda scan failed. Check logs for details.
+INFO:py4j.clientserver:Closing down clientserver connection

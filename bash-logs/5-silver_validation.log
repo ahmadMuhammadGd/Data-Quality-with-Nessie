@@ -1,0 +1,9 @@
+INFO:root:Successfully loaded `/env_variables/paths.env
+INFO:root:Successfully loaded `/env_variables/minio.env
+INFO:root:Successfully loaded `/env_variables/dremio.env
+INFO:root:Successfully loaded `/env_variables/nessie.env
+INFO:root:Successfully loaded `/env_variables/dwh.env
+Traceback (most recent call last):
+  File "/soda/checks/silver_amazon_sales.py", line 7, in <module>
+    from SparkCleaner import *
+AttributeError: module 'SparkCleaner' has no attribute 'DropDuplicatesStrategy'

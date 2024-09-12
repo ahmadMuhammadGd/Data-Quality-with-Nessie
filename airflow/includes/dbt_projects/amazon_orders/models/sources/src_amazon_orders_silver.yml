@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: amazon_csv_silver_orders
+    schema: "{{ env_var('NESSIE_CATALOG_NAME') }}.{{ env_var('AMAZON_PIPELINE_NAMESPACE') }}"
+    tables:
+      - name: "{{ env_var('SILVER_AMAZON_ORDERS_TABLE_LAST_BATCH') }}"
+        description: "Silver layer of the last batch of Amazon orders"

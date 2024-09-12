@@ -1,0 +1,10 @@
+{
+    "python.analysis.extraPaths": [
+        "./plugins",
+        "./plugins/hooks",
+        "./spark",
+        "./env_variables",
+        "./airflow/plugins",
+        "./config"
+    ]
+}

@@ -1,0 +1,63 @@
+checks for silver_amazon_orders_last_batch:
+    - schema:
+        fail:
+            when required column missing:
+            - Order_ID
+            - Order_Date
+            - Qty
+            - Amount
+
+    - row_count > 0
+
+    - duplicate_count(Order_ID, Category, Order_Date, Amount):
+        fail: when > 0
+
+    - missing_percent(Order_ID):
+        fail: when > 0%
+
+    - missing_percent(Amount):
+        fail: when > 0%
+
+    - missing_percent(Qty):
+        fail: when > 0%
+
+    - min(Amount):
+        fail: when < 0
+
+    - min(Qty):
+        fail: when < 0
+
+    - invalid_percent(Order_Date):
+        fail: when > 10%
+        valid format: date inverse
+
+    - missing_percent(Order_Status):
+        fail: when > 10%
+
+    - missing_percent(ORDERS_Channel):
+        fail: when > 10%
+
+    - missing_percent(Ship_Country):
+        fail: when > 10%
+
+    - values in (Order_ID, Order_Date) must exist in bronze_amazon_orders_last_batch (Order_ID, Order_Date):
+        samples limit: 0
+
+    - data_completeness > 0.70:
+        data_completeness query: |
+            WITH src_cnt AS (
+                SELECT 
+                    COUNT(*) AS src_cnt
+                FROM 
+                    bronze_amazon_orders_last_batch
+            ),
+            dist_cnt AS (
+                SELECT 
+                    COUNT(*) AS dist_cnt
+                FROM 
+                    silver_amazon_orders_last_batch
+            )
+            SELECT 
+                ROUND(dist_cnt / COALESCE(src_cnt, 0), 2) AS data_completeness
+            FROM 
+                src_cnt, dist_cnt;
