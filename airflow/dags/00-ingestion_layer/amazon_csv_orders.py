@@ -18,25 +18,36 @@ default_args = {
     'retries': 0,
 }
 
+doc_md_DAG="""
+# **Dag_id**: start_amazon_csv_orders
+- This DAG ingests Amazon order data from a CSV stored in an S3-compatible MinIO bucket into a Spark-based data processing pipeline. 
+- The pipeline validates the data with Soda checks and updates ingestion metadata on success or failure. 
+- It leverages version control via Nessie to create a new branch for each ingestion batch.
+"""
 
 @dag(
-    dag_id="ingest_amazon_csv_orders",
+    dag_id="start_amazon_csv_orders",
     catchup=False,  
-    tags=["Spark", "SSH", "Iceberg", "Soda", "Nessie", "ingestion", "CSV", "Amazon"],
+    tags=["Spark", "SSH", "Iceberg", "bronz", "Soda", "Nessie", "ingestion", "CSV", "Amazon"],
     schedule=timedelta(days=1),
     default_args=default_args,
+    doc_md=doc_md_DAG
 )
-
-    
 def ingest():
     @task.branch(task_id="start")
     def pick_s3_object(**kwargs):
+        """
+        Fetches the list of CSV files from the S3 bucket (landing prefix). 
+        If no files are found, it logs an informational message and updates the info dataset. 
+        If a file is found, it selects the first/last CSV and pushes the file path, timestamp, and recommended Nessie branch name to XCom.
+        """
         s3_hook = S3Hook(
             aws_conn_id='minio_connection', 
         )
 
         bucket_name = os.getenv("QUEUED_BUCKET")
-        objects = s3_hook.list_keys(bucket_name=bucket_name)
+        objects = s3_hook.list_keys(bucket_name=bucket_name, prefix='landing')
+        objects = [obj for obj in objects if obj.endswith('csv')]
 
         if not objects:
             logging.info("No objects found in the bucket")
@@ -52,18 +63,19 @@ def ingest():
             nessie_branch_prefex = os.getenv("BRANCH_AMAZON_ORDERS_PIPELINE_PREFEX")
             
             # Push values to XCom for further tasks
-            current_csv_name = object_name.split('/')[0]
+            current_csv_name = object_name.split('/')[-1]
+            current_csv_path = object_name
             
             timestamp = datetime.now()
             curent_timestamp = timestamp.strftime('%Y-%m-%dT%H:%M:%S') # for spark SLQ
-            branch_recommended_name = f'{nessie_branch_prefex}_{(object_name.split('/')[0]).replace('.csv', '')}_{str(timestamp.strftime('%Y%m%d%H%M%S'))}'
+            branch_recommended_name = f'{nessie_branch_prefex}_{(current_csv_name).replace('.csv', '')}_{str(timestamp.strftime('%Y%m%d%H%M%S'))}'
             
-            kwargs['ti'].xcom_push(key='current_csv'    , value=current_csv_name)
+            kwargs['ti'].xcom_push(key='current_csv'    , value=current_csv_path)
             kwargs['ti'].xcom_push(key='timestamp'      , value=curent_timestamp)
             kwargs['ti'].xcom_push(key='nessie_branch'  , value=branch_recommended_name)
             
             Variable.set("nessie_branch", branch_recommended_name)
-            Variable.set("curent_csv", current_csv_name)
+            Variable.set("curent_csv", current_csv_path)
             
             return 'defining_new_branch'
     
@@ -76,8 +88,8 @@ def ingest():
     @task(task_id = 'defining_new_branch')
     def define_branch(**kwargs)->None:
         '''
-        This task overwrites BRANCH_AMAZON_ORDERS_PIPELINE environment variable in spark cluster
-        return: None
+        Defines a new branch for Nessie in the Spark environment by updating the BRANCH_AMAZON_ORDERS_PIPELINE variable in the Nessie configuration (nessie.env). 
+        This is done via an SSH connection to the Spark cluster.
         '''
         nessie_branch_new = kwargs['ti'].xcom_pull(key='nessie_branch')
         
@@ -93,20 +105,31 @@ def ingest():
             )
     
     # 1. Ingest csv
+
     ingest_batch = SSHSparkOperator(
         task_id             ='csv_ingestion',
         ssh_conn_id         ='sparkSSH',
         application_path    ='/spark-container/spark/jobs/ingest.py',
-        python_args = 
-            f"--object-path {os.getenv('QUEUED_BUCKET')}/{{{{ ti.xcom_pull(task_ids='start', key='current_csv') }}}} -t {{{{ ti.xcom_pull(task_ids='start', key='timestamp') }}}}"
-        ) 
+        python_args         = 
+            f"--object-path {os.getenv('QUEUED_BUCKET')}/{{{{ ti.xcom_pull(task_ids='start', key='current_csv') }}}} -t {{{{ ti.xcom_pull(task_ids='start', key='timestamp') }}}}",
+        doc_md              =
+        """
+        Executes the ingestion of the selected CSV file into the bronze layer using Spark. 
+        It runs a Python script (ingest.py) on the Spark cluster via SSH, with arguments like the object path and timestamp retrieved from XCom.
+        """
+    ) 
 
     # 1.2 Validate ingested data with soda
     validate_batch = SSHSparkOperator(
         task_id             ='Audit_bronze_batch',
         ssh_conn_id         ='sparkSSH',
         application_path    ="/spark-container/soda/checks/bronz_amazon_orders.py",
-        python_args         ="-t {{ ti.xcom_pull(task_ids='start', key='timestamp') }}"
+        python_args         ="-t {{ ti.xcom_pull(task_ids='start', key='timestamp') }}",
+        doc_md              =
+        """
+         Audits the ingested data in the bronze layer using Soda checks. 
+         This validation task runs another Spark job via SSH (bronz_amazon_orders.py) to ensure data quality.
+        """
     )
     
     # 1.3.1 do something on validation failure
