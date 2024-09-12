@@ -87,7 +87,7 @@ spark = init_or_get_spark_session(app_name="data ingestion", direct_s3_read_writ
 
 try:
     ingested_batch_view = 'batch'
-    ingestion_timestamp = timestamp    
+    ingestion_timestamp = timestamp.replace('T', ' ')
     
     df=spark.read.option("header", True) \
         .option("inferSchema", True) \
@@ -103,6 +103,7 @@ try:
     spark.sql(f"USE REFERENCE {BRANCH_AMAZON_ORDERS_PIPELINE} IN {NESSIE_CATALOG_NAME}")
     
     min_order_date_in_batch = df.selectExpr("min(order_date)").collect()[0][0]
+    
     df.createOrReplaceTempView('ingested_batch_view')
     df_batch = spark.sql(f"""
     SELECT 
@@ -127,16 +128,21 @@ try:
 
     if df_batch_count != 0:
         df_batch.createOrReplaceTempView('df_batch')
-        spark.sql(f"""
+        load_sql = f"""
             INSERT INTO { NESSIE_CATALOG_NAME }.{ BRONZE_NAMESPACE }.{ AMAZON_ORDERS_TABLE }
             SELECT
                 *,
-                DATE_FORMATE(CAST('{ingestion_timestamp}' AS TIMESTAMP), 'yyyy-MM-dd HH:mm:ss') AS ingestion_date
+                TO_TIMESTAMP('{ingestion_timestamp}', 'yyyy-MM-dd HH:mm:ss') AS ingestion_date
             FROM ingested_batch_view 
-        """)
+        """
+        logging.info(f'rendered load SQL: {load_sql}')
+        spark.sql(load_sql)
     
     logging.info(f"{df_batch_count} rows has been loaded successfully into: `{ NESSIE_CATALOG_NAME }.{ BRONZE_NAMESPACE }.{ AMAZON_ORDERS_TABLE }` ..!")
-    
+    logging.info(f"""
+    bronz preview:
+    {spark.sql(f'SELECT * FROM { NESSIE_CATALOG_NAME }.{ BRONZE_NAMESPACE }.{ AMAZON_ORDERS_TABLE }').show()}
+    """)
 except Exception as e:
     logging.error (e)
     raise

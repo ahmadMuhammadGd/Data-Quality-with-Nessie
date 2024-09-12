@@ -54,7 +54,7 @@ def ingest():
             current_csv_name = object_name.split('/')[0]
             
             timestamp = datetime.now()
-            curent_timestamp = timestamp.strftime('%Y-%m-%d %H:%M:%S') # for spark SLQ
+            curent_timestamp = timestamp.strftime('%Y-%m-%dT%H:%M:%S') # for spark SLQ
             branch_recommended_name = f'{nessie_branch_prefex}_{(object_name.split('/')[0]).replace('.csv', '')}_{str(timestamp.strftime('%Y%m%d%H%M%S'))}'
             
             kwargs['ti'].xcom_push(key='current_csv'    , value=current_csv_name)
