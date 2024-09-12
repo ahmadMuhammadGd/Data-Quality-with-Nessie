@@ -4,6 +4,7 @@ from airflow.decorators import dag, task
 from includes.data.datasets import SUCCESS_DBT_TRANSFORM_DATASET, SUCCESS_PUBLISH_DATASET, FAIL_PUBLISH_DATASET
 from datetime import datetime
 from airflow.datasets.metadata import Metadata # type: ignore
+from airflow.models import Variable
 
 default_args = {
     'owner': 'airflow',
@@ -20,6 +21,12 @@ default_args = {
     tags=["Spark", "SSH", "Iceberg", "Soda", "Nessie", "PUBLISHING_DATASET", "CSV", "Amazon"],
     default_args=default_args,
     schedule=[SUCCESS_DBT_TRANSFORM_DATASET],
+    doc_md="""
+    # **Dag_id**: publish_and_move
+    This DAG is responsible for publishing transformed datasets by merging them into the main table using Spark, 
+    then moving processed CSV files from a "queued" to a "processed" S3 bucket. 
+    Finally, the DAG updates success or failure datasets based on the outcome.
+    """
 )
 
 def publish():
@@ -37,30 +44,35 @@ def publish():
         import logging, os 
         from airflow.providers.amazon.aws.hooks.s3 import S3Hook
         
-        object_name = kwargs['ti'].xcom_pull(
-            dag_id='ingest_amazon_csv_orders', 
-            task_ids='pick_minio_object',
-            key='current_csv'
-        )
-        
+        object_name = Variable.get("curent_csv")
+
         s3hook = S3Hook(aws_conn_id='minio_connection')
         
-        src_bucket = os.getenv('QUEUED_BUCKET')
+        src_bucket  = os.getenv('QUEUED_BUCKET')
         dest_bucket = os.getenv('PROCESSED_BUCKET')
-        object_path = f'{src_bucket}/{object_name}'
-        dist_path = f'{dest_bucket}/{datetime.now().year()}/{datetime.now().month()}/{datetime.now().day()}/{object_name}'
         
+        # now = datetime.now()
+        object_path = f'{object_name}'
+        dest_path = f'processed/{object_name}'
+        
+        print(f'Source Bucket: {src_bucket}')
+        print(f'Dest Bucket: {dest_bucket}')
+
+        print(f'Object Path: {object_path}')
+        print(f'dest Path: {dest_path}')
+        
+
         copy = s3hook.copy_object(
             source_bucket_key=object_path,  
-            dest_bucket_key=dist_path,      
+            dest_bucket_key=dest_path,      
             source_bucket_name=src_bucket,      
-            dest_bucket_name=dest_bucket          
+            dest_bucket_name=src_bucket          
         )
-        
+
         if copy:
-            logging.info(f"Successfully copied {object_path} to {dist_path}")
+            logging.info(f"Successfully copied {object_path} to {dest_path}")
         else:
-            logging.error(f"Failed to copy {object_path} to {dist_path}")
+            logging.error(f"Failed to copy {object_path} to {dest_path}")
         
 
         delete = s3hook.delete_objects(

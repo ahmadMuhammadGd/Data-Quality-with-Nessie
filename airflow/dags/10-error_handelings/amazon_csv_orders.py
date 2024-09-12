@@ -2,6 +2,7 @@ from operators.sparkSSH import SSHSparkOperator
 from airflow.utils.dates import days_ago
 from airflow.decorators import dag, task, task_group
 from datetime import datetime
+from airflow.models import Variable
 
 from includes.data.datasets import (
     FAIL_INGESTION_DATASET,
@@ -36,23 +37,25 @@ default_args = {
         FAIL_INGESTION_DATASET |
         FAIL_DBT_TRANSFORM_DATASET |
         FAIL_PUBLISH_DATASET
-    )
+    ),
+    doc_md="""
+    # **Dag_id**: etl_error_handling
+    - This DAG moves rejected CSV files to a rejected_csv folder in an S3 bucket whenever a failure occurs during data ingestion, cleaning, transformation, or publishing. 
+    - It updates relevant success or failure datasets based on the result.
+    """
 )
 
 def error_handling():
     @task(task_id='move_rejected_csvs')
     def move_rejected(**kwargs):
-        object_name = kwargs['ti'].xcom_pull(
-            dag_id='ingest_amazon_csv_orders', 
-            task_ids='pick_minio_object',
-            key='current_csv'
-        )
+        object_name = Variable.get("curent_csv")
+
         
         s3hook = S3Hook(aws_conn_id='minio_connection')
         
         bucket = os.getenv('QUEUED_BUCKET')
-        object_path = f'{bucket}/{object_name}'
-        dist_path = f'{bucket}/rejected_csv/{object_name}'
+        object_path = f'{object_name}'
+        dist_path = f'rejected_csv/{object_name}'
         
         copy = s3hook.copy_object(
             source_bucket_key=object_path,  
