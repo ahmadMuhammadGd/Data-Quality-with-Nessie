@@ -42,11 +42,13 @@ spark = init_or_get_spark_session(app_name="raw data soda validation")
 
 try:
     spark.sql(f"USE REFERENCE {BRANCH_AMAZON_ORDERS_PIPELINE} IN {NESSIE_CATALOG_NAME}")
-    current_branch = spark.sql('LIST REFERENCES IN nessie')
-    logging.log(
-    f"""current branch: 
-    {current_branch}
-    """)
+    current_branch_df = spark.sql('SHOW REFERENCE IN nessie')
+    current_branch_pd = current_branch_df.toPandas()["name"]
+    logging.info(
+        f"""current branches:
+        {current_branch_pd}
+        """
+    )
     df = spark.sql(
         f"""
         SELECT 
