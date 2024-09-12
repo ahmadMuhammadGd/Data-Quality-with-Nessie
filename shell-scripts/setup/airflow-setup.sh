@@ -9,7 +9,13 @@ docker exec airflow-node /home/airflow/.local/bin/airflow \
     --conn-login 'me' \
     --conn-password 'changeme' \
     --conn-host 'spark' \
-    --conn-port '22'
+    --conn-port '22' \
+    --conn-extra "{
+        "AWS_ACCESS_KEY_ID"     : "${AWS_ACCESS_KEY}",
+        "AWS_SECRET_ACCESS_KEY" : "${AWS_SECRET_KEY}",
+        "AWS_REGION"            : "${AWS_REGION}",
+        "AWS_DEFAULT_REGION"    : "${AWS_DEFAULT_REGION}"
+    }
 
 docker exec airflow-node /home/airflow/.local/bin/airflow \
     connections add 'minio_connection' \
