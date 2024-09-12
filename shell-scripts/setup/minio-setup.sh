@@ -1,11 +1,11 @@
 
-#################################################################################################
-#                                                                                               #  
-#  This script configures and manages MinIO client (mc) interactions within a Docker container. #
-#                                                                                               #                                                              
-#################################################################################################
+# #################################################################################################
+# #                                                                                               #  
+# #  This script configures and manages MinIO client (mc) interactions within a Docker container. #
+# #                                                                                               #                                                              
+# #################################################################################################
 
-# Configure MinIO client and create the warehouse bucket
+# # Configure MinIO client and create the warehouse bucket
 docker exec mc \
     bin/sh -c 'until (/usr/bin/mc config host add minio http://minio:9000 admin password) do echo "...waiting..." && sleep 1; done'
 
@@ -21,16 +21,16 @@ docker exec mc bin/sh -c '\
     /usr/bin/mc mb minio/queued ; \
     /usr/bin/mc policy set public minio/queued'
 
-# Remove and recreate the processed bucket
-docker exec mc bin/sh -c '\
-    /usr/bin/mc rm -r --force minio/processed ; \
-    /usr/bin/mc mb minio/processed ; \
-    /usr/bin/mc policy set public minio/processed'
+# # Remove and recreate the processed bucket
+# docker exec mc bin/sh -c '\
+#     /usr/bin/mc rm -r --force minio/processed ; \
+#     /usr/bin/mc mb minio/processed ; \
+#     /usr/bin/mc policy set public minio/processed'
 
 # Copy batchs directory content from host machine to MinIO bucket
 # Ensure the path to the directory is correct
 docker exec mc bin/sh -c '\
-    /usr/bin/mc cp -r ./data/original_dataset/batchs/* minio/queued/'
+    /usr/bin/mc cp -r /data/original_dataset/batchs/ minio/queued/landing'
 
 # Work around to avoid DNS errors, replacing http://minio:9000 with http://<minio_ip>:9000
 minio_container_name='minio'
