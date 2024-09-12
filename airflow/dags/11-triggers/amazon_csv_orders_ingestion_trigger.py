@@ -23,7 +23,11 @@ default_args = {
     dag_id="retrigger_csv_ingestion",
     catchup=False,
     default_args=default_args,
-    schedule=[SUCCESS_PUBLISH_DATASET, SUCCESS_ERROR_HANDLING_DATASET]
+    schedule=(SUCCESS_PUBLISH_DATASET | SUCCESS_ERROR_HANDLING_DATASET),
+    doc_md="""
+    # **Dag_id**: retrigger_csv_ingestion
+    This DAG re-triggers the Amazon CSV orders ingestion DAG after either a successful publishing step or successful error handling.
+    """
 )
 def trigger():
     re_ingest = TriggerDagRunOperator(
