@@ -21,6 +21,11 @@ default_args = {
     tags=["Spark", "SSH", "Iceberg", "Soda", "Nessie", "cleaning", "CSV", "Amazon"],
     default_args=default_args,
     schedule=[SUCCESS_INGESTION_DATASET],
+    doc_md = """
+    # **Dag_id:** clean_audit_load_to_silver
+    - This DAG cleans and audits ingested Amazon order data and loads it into the silver layer of a data lake using Spark. 
+    - It triggers based on the successful ingestion of data and performs data validation using Soda checks, followed by updating relevant datasets based on success or failure.
+    """
 )
 def cleansing_and_loading():
     clean_batch = SSHSparkOperator(
