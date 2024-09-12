@@ -6,6 +6,7 @@ from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from datetime import datetime
 from includes.data.datasets import FAIL_INGESTION_DATASET, SUCCESS_INGESTION_DATASET, INFO_INGESTION_DATASET
 from airflow.datasets.metadata import Metadata # type: ignore
+from airflow.models import Variable
 import logging, os 
 
 default_args = {
@@ -28,7 +29,7 @@ default_args = {
 
     
 def ingest():
-    @task.branch(task_id="pick_minio_object")
+    @task.branch(task_id="start")
     def pick_s3_object(**kwargs):
         s3_hook = S3Hook(
             aws_conn_id='minio_connection', 
@@ -60,6 +61,9 @@ def ingest():
             kwargs['ti'].xcom_push(key='current_csv'    , value=current_csv_name)
             kwargs['ti'].xcom_push(key='timestamp'      , value=curent_timestamp)
             kwargs['ti'].xcom_push(key='nessie_branch'  , value=branch_recommended_name)
+            
+            Variable.set("nessie_branch", branch_recommended_name)
+            Variable.set("curent_csv", current_csv_name)
             
             return 'defining_new_branch'
     
@@ -94,7 +98,7 @@ def ingest():
         ssh_conn_id         ='sparkSSH',
         application_path    ='/spark-container/spark/jobs/ingest.py',
         python_args = 
-            f"--object-path {os.getenv('QUEUED_BUCKET')}/{{{{ ti.xcom_pull(task_ids='pick_minio_object', key='current_csv') }}}} -t {{{{ ti.xcom_pull(task_ids='pick_minio_object', key='timestamp') }}}}"
+            f"--object-path {os.getenv('QUEUED_BUCKET')}/{{{{ ti.xcom_pull(task_ids='start', key='current_csv') }}}} -t {{{{ ti.xcom_pull(task_ids='start', key='timestamp') }}}}"
         ) 
 
     # 1.2 Validate ingested data with soda
@@ -102,7 +106,7 @@ def ingest():
         task_id             ='Audit_bronze_batch',
         ssh_conn_id         ='sparkSSH',
         application_path    ="/spark-container/soda/checks/bronz_amazon_orders.py",
-        python_args         ="-t {{ ti.xcom_pull(task_ids='pick_minio_object', key='timestamp') }}"
+        python_args         ="-t {{ ti.xcom_pull(task_ids='start', key='timestamp') }}"
     )
     
     # 1.3.1 do something on validation failure
