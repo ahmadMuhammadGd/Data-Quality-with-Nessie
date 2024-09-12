@@ -26,6 +26,12 @@ default_args = {
     tags=["Spark", "SSH", "Iceberg", "Soda", "Nessie", "transforming", "CSV", "Amazon"],
     default_args=default_args,
     schedule=[SUCCESS_CLEANING_DATASET],
+    doc_md="""
+    # **Dag_id**: transform_to_gold
+    - This DAG is responsible for transforming Amazon order data from the silver layer to the gold layer using dbt (Data Build Tool). 
+    - It processes source, dimension, and fact models in parallel, with tests after each transformation. 
+    - The workflow updates success or failure datasets depending on the outcome of the dbt transformations.
+    """
 )
 
 def transform_audit():
