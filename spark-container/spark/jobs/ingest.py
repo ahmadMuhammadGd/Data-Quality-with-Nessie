@@ -97,9 +97,11 @@ try:
     
     
     logging.info(f"Source row count: {df.count()}")
+        
+    logging.info(f"Creating branch: `{BRANCH_AMAZON_ORDERS_PIPELINE}` ..")
+    spark.sql(f"CREATE BRANCH IF NOT EXISTS {BRANCH_AMAZON_ORDERS_PIPELINE} IN {NESSIE_CATALOG_NAME} FROM {BRANCH_MAIN}")
     
     logging.info(f"Switching to the branch: `{BRANCH_AMAZON_ORDERS_PIPELINE}` ..")
-    spark.sql(f"CREATE BRANCH IF NOT EXISTS {BRANCH_AMAZON_ORDERS_PIPELINE} IN {NESSIE_CATALOG_NAME}")
     spark.sql(f"USE REFERENCE {BRANCH_AMAZON_ORDERS_PIPELINE} IN {NESSIE_CATALOG_NAME}")
     
     min_order_date_in_batch = df.selectExpr("min(order_date)").collect()[0][0]

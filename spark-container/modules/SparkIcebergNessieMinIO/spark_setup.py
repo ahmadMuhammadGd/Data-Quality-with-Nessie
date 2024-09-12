@@ -52,6 +52,10 @@ def init_or_get_spark_session(app_name:str, master:str='local[*]', direct_s3_rea
             .config(conf=conf)\
             .getOrCreate()
         
+        logging.debug("Spark Configuration:")
+        for item in spark.sparkContext.getConf().getAll():
+            logging.debug(f"{item[0]} = {item[1]}")
+        
         return spark
     except Exception as e:
         print(f"Error creating Spark session: {e}")
