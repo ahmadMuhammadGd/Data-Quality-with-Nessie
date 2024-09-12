@@ -11,10 +11,6 @@
 
 
 # echo -e "AIRFLOW_UID=$(id -u)" > ./airflow/.env
-set -e 
-export AWS_ACCESS_KEY_ID="admin"
-export AWS_SECRET_ACCESS_KEY="password"
-export AWS_ENDPOINT_URL="http://minio:9000"
 
 docker compose up minio mc nessie -d &&
 docker compose -f ./airflow/airflow-compose.yaml up airflow-init -d  &&
