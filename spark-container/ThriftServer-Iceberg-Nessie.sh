@@ -19,6 +19,7 @@ spark-submit \
     --conf spark.sql.extensions=org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions,org.projectnessie.spark.extensions.NessieSparkSessionExtensions \
     --conf spark.sql.catalog.nessie=org.apache.iceberg.spark.SparkCatalog \
     --conf spark.sql.catalog.nessie.uri=$NESSIE_URI \
+    --conf spark.sql.catalog.nessie.ref=$BRANCH_MAIN \
     --conf spark.sql.catalog.nessie.authentication.type=NONE \
     --conf spark.sql.catalog.nessie.catalog-impl=org.apache.iceberg.nessie.NessieCatalog \
     --conf spark.sql.catalog.nessie.warehouse=$MINIO_ICEBERG_S3_BUCKET \
