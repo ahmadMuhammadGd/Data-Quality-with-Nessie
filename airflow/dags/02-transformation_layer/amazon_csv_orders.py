@@ -6,6 +6,7 @@ from airflow.operators.bash import BashOperator
 from includes.data.datasets import SUCCESS_CLEANING_DATASET, SUCCESS_DBT_TRANSFORM_DATASET, FAIL_DBT_TRANSFORM_DATASET
 from airflow.datasets.metadata import Metadata # type: ignore
 from datetime import datetime
+from airflow.models import Variable
 import os 
     
 
@@ -49,6 +50,7 @@ def transform_audit():
             run = BashOperator(
                 task_id = f"run_{model_name}",
                 bash_command= f"""
+                export BRANCH_AMAZON_ORDERS_PIPELINE={{{{ var.value.nessie_branch }}}}
                 cd "{dbt_project_dir}" 
                 dbt run --select {model_name}
                 """
@@ -56,6 +58,7 @@ def transform_audit():
             test = BashOperator(
                 task_id = f"test_{model_name}",
                 bash_command= f"""
+                export BRANCH_AMAZON_ORDERS_PIPELINE={{{{ var.value.nessie_branch }}}}
                 cd "{dbt_project_dir}" 
                 dbt test --select {model_name}
                 """
