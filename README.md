@@ -4,11 +4,27 @@
 
 # Table of Contents
 - [Project Overview](#project-overview)
+  - [Objectives](#objectives)
+  - [Introduction](#introduction)
+  - [Airflow](#airflow)
+  - [Nessie Branching](#nessie-branching)
+  - [dbt-core Tests vs SODA-core](#dbt-core-tests-vs-soda-core)
 - [Set Up the Project](#set-up-the-project)
-- [Architecture Overview](#architecture-overview)
-- [Configuration](#configuration)
+  - [Prerequisites](#prerequisites)
+  - [Environment Setup](#environment-setup)
 - [Troubleshooting](#troubleshooting)
-- [Feature Work](#feature-work)
+  - [Ingestion Failure](#ingestion-failure)
+  - [Transformation DAG (dbt-core[PyHive])](#transformation-dag-dbt-corepyhive)
+- [Airflow Data-Aware DAGs](#airflow-data-aware-dags)
+  - [Branching and Ingestion Layer DAG (Bronze)](#branching-and-ingestion-layer-dag-bronze)
+  - [Cleaning Layer DAG (Silver)](#cleaning-layer-dag-silver)
+  - [Transformation Layer DAG (Gold)](#transformation-layer-dag-gold)
+  - [Publish and Move Raw CSVs DAG](#publish-and-move-raw-csvs-dag)
+  - [Error Handling DAG](#error-handling-dag)
+  - [Re-ingest DAG](#re-ingest-dag)
+- [Connections](#connections)
+- [Project Directory Structure](#project-directory-structure)
+- [Contribution](#contribution)
 
 # Project Overview
 ## Objectives
@@ -126,7 +142,70 @@ docker exec spark sh spark-container/ThriftServer-Iceberg-Nessie.sh
 ![clean and audit](./md_assets/airflow/dags/cleaning.png)
 - This DAG cleans and audits ingested Amazon order data and loads it into the silver layer of a data lake using Spark. 
 - It triggers based on the successful ingestion of data and performs data validation using Soda checks, followed by updating relevant datasets based on success or failure.
-  
+
+A code block demonistrates data cleansing in this project from `./spark-container/spark/jobs/cleansing.py`
+``` python
+    clean_df = df.withColumn('Order_Date', to_date(df.Order_Date, format='MM-dd-yy')) \
+        .dropna(subset=['Size', 'Qty', 'Amount', 'Order_ID', 'Order_Date', 'Currency']) \
+        .filter( (col('Qty') > 0) & (col('Amount') > 0) ) \
+        .fillna({
+            "Order_Status"          :   "INVALID_VALUE",
+            "Fulfilment"            :   "INVALID_VALUE",
+            "ORDERS_Channel"        :   "INVALID_VALUE",
+            "ship_service_level"    :   "INVALID_VALUE",
+            "Category"              :   "INVALID_VALUE",
+            "Courier_Status"        :   "INVALID_VALUE",
+            "Ship_City"             :   "INVALID_VALUE",
+            "Ship_State"            :   "INVALID_VALUE",
+            "Ship_Postal_Code"      :   "INVALID_VALUE",
+            "Ship_Country"          :   "INVALID_VALUE",
+            "Fulfilled_By"          :   "INVALID_VALUE",
+            "New"                   :   "INVALID_VALUE",
+            "PendingS"              :   "INVALID_VALUE",
+        }) \
+        .drop_duplicates(subset=['Order_ID', 'Category', 'Order_Date', 'Amount']) 
+    
+    # before loading, we need to check spelling for some columns
+    # picking up columns that has determined values
+    # such as: size, status, category, etc
+    # this stage should discover if there any typos in these columns
+    
+    target_col_names = [
+        "Order_Status",
+        "Fulfilment",
+        "ORDERS_Channel",
+        "ship_service_level",
+        "Category",
+        "Size",
+        "Courier_Status",
+        "Currency",
+        "Ship_City",
+        "Ship_State",
+        "Ship_Country",
+        "Fulfilled_By",
+        "New",
+    ]
+
+    from pyspark.sql.functions import pandas_udf, col
+    from pyspark.sql.types import StringType
+    import pandas as pd # type: ignore
+    from autocorrect import Speller # type: ignore
+
+    spell = Speller()
+    @pandas_udf(StringType())
+    def correct_string_spelling_udf(string: pd.Series) -> pd.Series:
+        return string.apply(lambda x: str(spell(x)) if x else x)
+
+    @pandas_udf(StringType())
+    def standarize_string_udf(sentence: pd.Series) -> pd.Series:
+        return sentence.apply(lambda x: x.capitalize().strip() if x else x)
+
+    # Apply the UDFs to the DataFrame columns
+    for column in target_col_names:
+        clean_df = clean_df \
+                    .withColumn(column, standarize_string_udf(col(column))) \
+                    .withColumn(column, correct_string_spelling_udf(col(column)))
+  ```  
 ## Transformation layer DAG (Gold)
 ![dbt transformation and testing](./md_assets/airflow/dags/transform.png)
 - This DAG is responsible for transforming Amazon order data from the silver layer to the gold layer using dbt (Data Build Tool). 
@@ -161,7 +240,7 @@ The diagram above illustrates how the various components of the data pipeline in
 
 
 # Project Directory-Structure
-``` plaintext
+```plaintext
 .
 ├── airflow
 │   ├── airflow-compose.yaml
@@ -293,8 +372,7 @@ The diagram above illustrates how the various components of the data pipeline in
 │       ├── batchs
 │       │   ├── sampled_data_1.csv
 │       │   ├── sampled_data_2.csv
-│       │   ├── sampled_data_3.csv
-│       │   └── ...
+│       │   └── sampled_data_3.csv
 │       ├── README.md
 │       └── sampler.py
 ├── docker-compose.yaml
@@ -353,3 +431,15 @@ The diagram above illustrates how the various components of the data pipeline in
 
 69 directories, 117 files
 ```
+
+## Contribution
+
+Contributions to this project are highly welcomed and greatly appreciated. If you would like to contribute, please adhere to the following guidelines:
+
+1. **Fork the Repository:** Start by forking the repository to create your own copy where you can make changes without affecting the original project.
+2. **Create a Branch:** Before making changes, create a new branch with a descriptive name related to the feature or fix you're working on.
+3. **Make Your Changes:** Implement your changes or additions, ensuring to follow the existing code style and standards. If you’re adding a new feature, please include corresponding tests and documentation.
+4. **Submit a Pull Request:** Once your changes are ready, submit a pull request detailing what you have done. Be sure to explain the purpose of your changes and how they improve the project.
+5. **Review Process:** Your pull request will be reviewed by project maintainers. Feedback may be provided, and you may need to make additional changes before your pull request is merged.
+
+We value the contributions and strive to incorporate valuable enhancements and fixes. For any significant changes, please open an issue first to discuss your ideas and get feedback from the community before proceeding. Thank you for your interest and support in improving this!
