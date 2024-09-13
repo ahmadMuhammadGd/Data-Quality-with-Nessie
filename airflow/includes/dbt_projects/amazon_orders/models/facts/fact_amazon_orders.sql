@@ -29,6 +29,9 @@ ON
 LEFT JOIN
     {{ ref('location_dim') }} as loc_dim
 ON
+    src.ship_country = loc_dim.ship_country
+    src.ship_state = loc_dim.ship_state
+    src.ship_city = loc_dim.ship_city
     src.Ship_Postal_Code = loc_dim.Ship_Postal_Code
 LEFT JOIN
     {{ ref('product_dim') }} as prod_dim
