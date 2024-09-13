@@ -1,8 +1,8 @@
 # SSHSparkOperator
 
-This is an extra field example
-> It's important to submit minio-related spark jobs
-
+## How to use?
+- Create an SSH connection with hostname, password, and port
+- In case of using Minio-related spark submits, add this extra field:  
 ```json
 {
   "AWS_ACCESS_KEY_ID": "admin",
@@ -11,3 +11,5 @@ This is an extra field example
   "AWS_DEFAULT_REGION": "us-east-1"
 }
 ```
+## Important Note 
+DO NOT USE THIS IN PRODUCTION !!!!!!!!
