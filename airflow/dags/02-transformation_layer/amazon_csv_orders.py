@@ -17,7 +17,7 @@ default_args = {
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 0,
-    'pool': 'CSV_PIPLEINE_POOL'
+    'pool': 'amazon_csv_pipeline_1_slot_pool'
 }
 
 @dag(
