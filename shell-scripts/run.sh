@@ -22,6 +22,9 @@ docker compose up spark -d
 
 sh ./shell-scripts/setup/airflow-setup.sh
 
+docker exec spark sh /spark-container/ThriftServer-Iceberg-Nessie.sh \
+    > bash-logs/1-thrift-server.log
+
 docker exec spark spark-submit /spark-container/spark/jobs/init_project.py \
     > bash-logs/0-init_job.log
 
