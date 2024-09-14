@@ -84,10 +84,10 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/includes:/opt/airflow/includes
   user: "${AIRFLOW_UID:-50000}:0"
 
-# networks:
-#   airflow-network:
-#     name: airflow-network
-#     driver: bridge
+networks:
+  BigData:
+    name: BigData-network
+    driver: bridge
 
 services:
   airflow-node:
@@ -108,7 +108,7 @@ services:
       airflow-init:
         condition: service_completed_successfully
     networks:
-      - BigData-network
+      - BigData
 
   airflow-init:
     <<: *airflow-common
@@ -150,4 +150,4 @@ services:
       - bash
       - airflow
     networks:
-      - BigData-network
+      - BigData
