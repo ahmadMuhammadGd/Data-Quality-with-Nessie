@@ -76,7 +76,7 @@ try:
         }) \
         .drop_duplicates(subset=['Order_ID', 'Category', 'Order_Date', 'Amount']) \
         .withColumn('Size', upper('Size')) \
-        .filter(col("Size").contains(['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL', '6XL', 'FREE', '7XL', '8XL', '9XL', 'XXXS', 'XXS', 'TALL', 'PETITE', 
+        .filter(col("Size").isin(['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL', '6XL', 'FREE', '7XL', '8XL', '9XL', 'XXXS', 'XXS', 'TALL', 'PETITE', 
          'SMALL', 'MEDIUM', 'LARGE', 'PLUS SIZE', 'OVERSIZED']))
     
     # before loading, we need to check spelling for some columns
