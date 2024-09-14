@@ -32,7 +32,7 @@ default_args = {
 def trigger():
     re_ingest = TriggerDagRunOperator(
         task_id = 're_ingest',
-        trigger_dag_id= 'ingest_amazon_csv_orders'
+        trigger_dag_id= 'start_amazon_csv_orders'
     )
     re_ingest
 trigger()
