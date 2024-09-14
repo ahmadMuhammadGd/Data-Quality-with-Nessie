@@ -1,8 +1,8 @@
+INFO:root:Successfully loaded `/config/dremio.env
+INFO:root:Successfully loaded `/config/dwh.env
+INFO:root:Successfully loaded `/config/nessie.env
 INFO:root:Successfully loaded `/config/paths.env
 INFO:root:Successfully loaded `/config/minio.env
-INFO:root:Successfully loaded `/config/dremio.env
-INFO:root:Successfully loaded `/config/nessie.env
-INFO:root:Successfully loaded `/config/dwh.env
 INFO:root:Creating "nessie.pipeline" namespace
 INFO:root:Namespace"nessie.pipeline": Done ..!
 INFO:root:Creating "nessie.bronz" namespace
@@ -15,6 +15,107 @@ INFO:root:***********************************
 INFO:root:Creating "main" nessie branch ..
 INFO:root:Branch "main": Done ..!
 INFO:root:***********************************
+INFO:root:-----------------------------------------------------
+--               BRONZE TABLES                     --
+-----------------------------------------------------
+CREATE OR REPLACE TABLE nessie.bronz.amazon_orders
+(
+    Order_ID            string,
+    Order_Date          Date,
+    Order_Status        string,
+    Fulfilment          string,
+    ORDERS_Channel      string,
+    ship_service_level  string,
+    Category            string,
+    Size                string,
+    Courier_Status      string,
+    Qty                 integer,
+    Currency            string,
+    Amount              double,
+    Ship_City           string,
+    Ship_State          string,
+    Ship_Postal_Code    integer,
+    Ship_Country        string,
+    B2B                 boolean,
+    Fulfilled_By        string,
+    New                 string,
+    PendingS            string,
+    Ingestion_Date      TIMESTAMP
+)
+USING iceberg
+PARTITIONED BY (MONTH(Order_Date))
+INFO:root:
+
+
+-----------------------------------------------------
+--                 SILVER TABLES                   --
+-----------------------------------------------------
+
+CREATE OR REPLACE TABLE nessie.silver.amazon_orders
+(
+    Order_ID            string,
+    Order_Date          Date,
+    Order_Status        string,
+    Fulfilment          string,
+    ORDERS_Channel      string,
+    ship_service_level  string,
+    Category            string,
+    Size                string,
+    Courier_Status      string,
+    Qty                 integer,
+    Currency            string,
+    Amount              double,
+    Ship_City           string,
+    Ship_State          string,
+    Ship_Postal_Code    integer,
+    Ship_Country        string,
+    B2B                 boolean,
+    Fulfilled_By        string,
+    New                 string,
+    PendingS            string,
+    Ingestion_Date      TIMESTAMP
+)
+USING iceberg
+PARTITIONED BY (MONTH(Order_Date))
+INFO:root:
+
+-----------------------------------------------------
+--                      ETL_VIEWS                  --
+-----------------------------------------------------
+CREATE OR REPLACE VIEW nessie.pipeline.bronze_amazon_orders_last_batch
+AS
+(
+    WITH max_Ingestion_Date AS (
+        SELECT
+            MAX(Ingestion_Date) AS mx_igdate
+        FROM 
+            nessie.bronz.amazon_orders
+    )
+    SELECT
+        src.*
+    FROM 
+        nessie.bronz.amazon_orders AS src
+    WHERE
+        src.Ingestion_Date = (SELECT mx_igdate FROM max_Ingestion_Date)
+)
+INFO:root:
+
+CREATE OR REPLACE VIEW nessie.pipeline.silver_amazon_orders_last_batch
+AS
+(
+    WITH max_Ingestion_Date AS (
+        SELECT
+            MAX(Ingestion_Date) AS mx_igdate
+        FROM 
+            nessie.silver.amazon_orders
+    )
+    SELECT
+        src.*
+    FROM 
+        nessie.silver.amazon_orders AS src
+    WHERE
+        src.Ingestion_Date = (SELECT mx_igdate FROM max_Ingestion_Date)
+)
 INFO:root:Summary:
 INFO:root:Tables in branch: main
 +---------+-------------+-----------+
