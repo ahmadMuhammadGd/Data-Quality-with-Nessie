@@ -54,7 +54,7 @@ try:
     df.show()
     
     # now, this is the cleaning part !     
-    from pyspark.sql.functions import col, to_date
+    from pyspark.sql.functions import col, to_date, upper, initcap
 
     clean_df = df.withColumn('Order_Date', to_date(df.Order_Date, format='MM-dd-yy')) \
         .dropna(subset=['Size', 'Qty', 'Amount', 'Order_ID', 'Order_Date', 'Currency']) \
@@ -74,7 +74,10 @@ try:
             "New"                   :   "INVALID_VALUE",
             "PendingS"              :   "INVALID_VALUE",
         }) \
-        .drop_duplicates(subset=['Order_ID', 'Category', 'Order_Date', 'Amount']) 
+        .drop_duplicates(subset=['Order_ID', 'Category', 'Order_Date', 'Amount']) \
+        .withColumn('Size', upper('Size')) \
+        .filter(col("Size").contains(['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL', '6XL', 'FREE', '7XL', '8XL', '9XL', 'XXXS', 'XXS', 'TALL', 'PETITE', 
+         'SMALL', 'MEDIUM', 'LARGE', 'PLUS SIZE', 'OVERSIZED']))
     
     # before loading, we need to check spelling for some columns
     # picking up columns that has determined values
@@ -87,7 +90,6 @@ try:
         "ORDERS_Channel",
         "ship_service_level",
         "Category",
-        "Size",
         "Courier_Status",
         "Currency",
         "Ship_City",
@@ -97,7 +99,7 @@ try:
         "New",
     ]
 
-    from pyspark.sql.functions import pandas_udf, col
+    from pyspark.sql.functions import pandas_udf
     from pyspark.sql.types import StringType
     import pandas as pd # type: ignore
     from autocorrect import Speller # type: ignore
@@ -107,14 +109,11 @@ try:
     def correct_string_spelling_udf(string: pd.Series) -> pd.Series:
         return string.apply(lambda x: str(spell(x)) if x else x)
 
-    @pandas_udf(StringType())
-    def standarize_string_udf(sentence: pd.Series) -> pd.Series:
-        return sentence.apply(lambda x: x.capitalize().strip() if x else x)
 
     # Apply the UDFs to the DataFrame columns
     for column in target_col_names:
         clean_df = clean_df \
-                    .withColumn(column, standarize_string_udf(col(column))) \
+                    .withColumn(column, initcap(col(column))) \
                     .withColumn(column, correct_string_spelling_udf(col(column)))
     
     logging.info('STAGE 2: Standarize string columns and fix typos')
