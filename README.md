@@ -1,7 +1,8 @@
 # Data Quality with Nessie
 
 ![data quality using Nessie catalog, MinIO, mc, dbt, Soda, Airflow, Spark, and Iceberg](./md_assets/project_overview.png)
-
+# Disclaimer
+The configurations provided in this project are for **demonstration purposes only**. They should not be used in a production environment. **I do not take responsibility for any failures, issues, or consequences that may arise from using these settings in a production setup.**
 # Table of Contents
 - [Project Overview](#project-overview)
   - [Objectives](#objectives)
@@ -137,6 +138,10 @@ docker exec spark sh spark-container/ThriftServer-Iceberg-Nessie.sh
 - This DAG ingests Amazon order data from a CSV stored in an S3-compatible MinIO bucket into a Spark-based data processing pipeline. 
 - The pipeline validates the data with Soda checks and updates ingestion metadata on success or failure. 
 - It leverages version control via Nessie to create a new branch for each ingestion batch.
+### Limitations
+Due to the reliance on environment variables for data sharing between DAGs, it is not feasible to run the workflow concurrently. This limitation arises from potential conflicts when sharing Nessie branch names and other environment-specific variables across multiple parallel runs.
+
+As a temporary solution, both this ingestion DAG and the related transformation DAGs are configured to run in a pool with only one slot. This setup ensures that only one instance of the DAG can run at any given time, preventing race conditions or data inconsistencies caused by parallel execution.
 
 ## Cleaning layer DAG (Silver)
 ![clean and audit](./md_assets/airflow/dags/cleaning.png)
@@ -211,6 +216,20 @@ A code block demonistrates data cleansing in this project from `./spark-containe
 - This DAG is responsible for transforming Amazon order data from the silver layer to the gold layer using dbt (Data Build Tool). 
 - It processes source, dimension, and fact models in parallel, with tests after each transformation. 
 - The workflow updates success or failure datasets depending on the outcome of the dbt transformations.
+### dbt models structure
+``` plaintext
+├── dims
+│   ├── currency_dim.sql
+│   ├── date_dim.sql
+│   ├── location_dim.sql
+│   ├── product_dim.sql
+│   └── shipping_dim.sql
+├── facts
+│   └── fact_amazon_orders.sql
+└── sources
+    ├── amazon_orders_silver.sql
+    └── src_amazon_orders_silver.yml
+```
 
 ## Publish and Move Raw CSVs DAG
 ![publish](./md_assets/airflow/dags/publish.png)
@@ -265,100 +284,40 @@ The diagram above illustrates how the various components of the data pipeline in
 │   ├── includes
 │   │   ├── data
 │   │   │   └── datasets.py
-│   │   ├── dbt_project
-│   │   │   └── profiles.yml
-│   │   └── dbt_projects
-│   │       └── amazon_orders
-│   │           ├── analyses
-│   │           ├── dbt_project.yml
-│   │           ├── macros
-│   │           │   └── dim_loaders
-│   │           │       ├── date_scd_0.sql
-│   │           │       └── scd_0.sql
-│   │           ├── models
-│   │           │   ├── dims
-│   │           │   │   ├── currency_dim.sql
-│   │           │   │   ├── date_dim.sql
-│   │           │   │   ├── location_dim.sql
-│   │           │   │   ├── product_dim.sql
-│   │           │   │   └── shipping_dim.sql
-│   │           │   ├── facts
-│   │           │   │   └── fact_amazon_orders.sql
-│   │           │   └── sources
-│   │           │       ├── amazon_orders_silver.sql
-│   │           │       └── src_amazon_orders_silver.yml
-│   │           ├── README.md
-│   │           ├── seeds
-│   │           ├── snapshots
-│   │           ├── target
-│   │           │   ├── catalog.json
-│   │           │   ├── compiled
-│   │           │   │   └── amazon_orders
-│   │           │   │       └── models
-│   │           │   │           ├── amazon_orders_silver.sql
-│   │           │   │           ├── dimensions
-│   │           │   │           │   ├── date_dim.sql
-│   │           │   │           │   └── product_dim.sql
-│   │           │   │           ├── dims
-│   │           │   │           │   ├── currency_dim.sql
-│   │           │   │           │   ├── date_dim.sql
-│   │           │   │           │   ├── location_dim.sql
-│   │           │   │           │   ├── product_dim.sql
-│   │           │   │           │   └── shipping_dim.sql
-│   │           │   │           ├── facts
-│   │           │   │           │   └── fact_amazon_orders.sql
-│   │           │   │           ├── sources
-│   │           │   │           │   └── amazon_orders_silver.sql
-│   │           │   │           └── target
-│   │           │   │               ├── currency_dim.sql
-│   │           │   │               ├── date_dim.sql
-│   │           │   │               ├── location_dim.sql
-│   │           │   │               ├── product_dim.sql
-│   │           │   │               └── shipping_dim.sql
-│   │           │   ├── graph.gpickle
-│   │           │   ├── graph_summary.json
-│   │           │   ├── index.html
-│   │           │   ├── manifest.json
-│   │           │   ├── partial_parse.msgpack
-│   │           │   ├── perf_info.json
-│   │           │   ├── run
-│   │           │   │   └── amazon_orders
-│   │           │   │       └── models
-│   │           │   │           ├── amazon_orders_silver.sql
-│   │           │   │           ├── dims
-│   │           │   │           │   ├── currency_dim.sql
-│   │           │   │           │   ├── date_dim.sql
-│   │           │   │           │   ├── location_dim.sql
-│   │           │   │           │   ├── product_dim.sql
-│   │           │   │           │   └── shipping_dim.sql
-│   │           │   │           ├── facts
-│   │           │   │           │   └── fact_amazon_orders.sql
-│   │           │   │           ├── sources
-│   │           │   │           │   └── amazon_orders_silver.sql
-│   │           │   │           └── target
-│   │           │   │               ├── currency_dim.sql
-│   │           │   │               ├── date_dim.sql
-│   │           │   │               ├── location_dim.sql
-│   │           │   │               ├── product_dim.sql
-│   │           │   │               └── shipping_dim.sql
-│   │           │   ├── run_results.json
-│   │           │   └── semantic_manifest.json
-│   │           └── tests
-│   │               ├── dim_tests.yml
-│   │               └── fact_tests.yml
+│   │   ├── dbt_projects
+│   │   │   └── amazon_orders
+│   │   │       ├── analyses
+│   │   │       ├── dbt_project.yml
+│   │   │       ├── macros
+│   │   │       │   └── dim_loaders
+│   │   │       │       ├── date_scd_0.sql
+│   │   │       │       └── scd_0.sql
+│   │   │       ├── models
+│   │   │       │   ├── dims
+│   │   │       │   │   ├── currency_dim.sql
+│   │   │       │   │   ├── date_dim.sql
+│   │   │       │   │   ├── location_dim.sql
+│   │   │       │   │   ├── product_dim.sql
+│   │   │       │   │   └── shipping_dim.sql
+│   │   │       │   ├── facts
+│   │   │       │   │   └── fact_amazon_orders.sql
+│   │   │       │   └── sources
+│   │   │       │       ├── amazon_orders_silver.sql
+│   │   │       │       └── src_amazon_orders_silver.yml
+│   │   │       ├── README.md
+│   │   │       ├── seeds
+│   │   │       ├── snapshots
+│   │   │       └── tests
+│   │   │           ├── dim_tests.yml
+│   │   │           └── fact_tests.yml
+│   │   └── pools
+│   │       └── pools.py
 │   ├── plugins
 │   │   └── operators
 │   │       ├── sparkSSH.md
 │   │       └── sparkSSH.py
 │   ├── profiles.yml
 │   └── requirements.txt
-├── bash-logs
-│   ├── 0-init_job.log
-│   ├── 1-ingest.log
-│   ├── 2-bronze_validation.log
-│   ├── 3-cleansing.log
-│   ├── 5-silver_validation.log
-│   └── 6-load.log
 ├── config
 │   ├── dremio.env
 │   ├── dwh.env
@@ -372,7 +331,8 @@ The diagram above illustrates how the various components of the data pipeline in
 │       ├── batchs
 │       │   ├── sampled_data_1.csv
 │       │   ├── sampled_data_2.csv
-│       │   └── sampled_data_3.csv
+│       │   ├── sampled_data_3.csv
+│       │   └── sampled_data_4.csv
 │       ├── README.md
 │       └── sampler.py
 ├── docker-compose.yaml
@@ -429,7 +389,7 @@ The diagram above illustrates how the various components of the data pipeline in
     │       └── merge_into_main.py
     └── ThriftServer-Iceberg-Nessie.sh
 
-69 directories, 117 files
+51 directories, 76 files
 ```
 
 ## Contribution
