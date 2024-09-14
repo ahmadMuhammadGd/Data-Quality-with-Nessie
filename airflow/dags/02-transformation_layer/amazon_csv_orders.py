@@ -17,8 +17,8 @@ default_args = {
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 0,
+    'pool': 'CSV_PIPLEINE_POOL'
 }
-
 
 @dag(
     dag_id="transform_to_gold",

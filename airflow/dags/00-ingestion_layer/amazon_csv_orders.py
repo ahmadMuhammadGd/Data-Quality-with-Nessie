@@ -1,11 +1,12 @@
 from operators.sparkSSH import SSHSparkOperator
 from airflow.providers.ssh.hooks.ssh import SSHHook
 from airflow.utils.dates import days_ago, timedelta
-from airflow.decorators import dag, task, task_group
+from airflow.decorators import dag, task
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from datetime import datetime
 from includes.data.datasets import FAIL_INGESTION_DATASET, SUCCESS_INGESTION_DATASET, INFO_INGESTION_DATASET
 from airflow.datasets.metadata import Metadata # type: ignore
+from includes.pools.pools import CSV_PIPLEINE_POOL
 from airflow.models import Variable
 import logging, os 
 
@@ -16,6 +17,7 @@ default_args = {
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 0,
+    'pool': 'CSV_PIPLEINE_POOL'
 }
 
 doc_md_DAG="""
