@@ -30,8 +30,6 @@ services:
       - PYTHONPATH=spark-container/spark:/config:/spark-container$PYTHONPATH
     networks:
       - BigData
-    command: |
-      bash -c "sh /spark-container/ThriftServer-Iceberg-Nessie.sh"
     
   nessie:
     image: projectnessie/nessie:0.67.0

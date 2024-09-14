@@ -1,7 +1,7 @@
 export $(grep -v '^\s*#.*' ./config.env | xargs)
 
-docker network connect airflow-network spark
-docker network connect airflow-network minio
+# docker network connect airflow-network spark
+# docker network connect airflow-network minio
 
 docker exec airflow-node /home/airflow/.local/bin/airflow \
     connections add 'sparkSSH' \
@@ -15,15 +15,15 @@ docker exec airflow-node /home/airflow/.local/bin/airflow \
         "AWS_SECRET_ACCESS_KEY" : "${AWS_SECRET_KEY}",
         "AWS_REGION"            : "${AWS_REGION}",
         "AWS_DEFAULT_REGION"    : "${AWS_DEFAULT_REGION}"
-    }
+    }"
 
 docker exec airflow-node /home/airflow/.local/bin/airflow \
     connections add 'minio_connection' \
     --conn-type 'aws' \
     --conn-extra "{
-    "aws_access_key_id": "${AWS_ACCESS_KEY}",
-    "aws_secret_access_key": "${AWS_SECRET_KEY}",
-    "endpoint_url": "http://minio:9000"
+    "aws_access_key_id"     : "${AWS_ACCESS_KEY}",
+    "aws_secret_access_key" : "${AWS_SECRET_KEY}",
+    "endpoint_url"          : "http://minio:9000"
     }"
 
 
