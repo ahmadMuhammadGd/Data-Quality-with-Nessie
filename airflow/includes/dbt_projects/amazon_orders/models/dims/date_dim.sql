@@ -7,13 +7,45 @@
     partition_by='MONTH(full_date)'
 ) }}
 
-{% set source_table = ref('amazon_orders_silver') %}
+WITH date_series AS (
+    SELECT
+        src.order_date AS full_date,
+        MIN(ingested_at) AS ingested_at
+    FROM
+        {{ ref('amazon_orders_silver') }} AS src
+    
+    {% if is_incremental() %}
+    LEFT JOIN
+        {{ this }} AS dim
+    ON
+        dim.full_date = src.order_date
+    WHERE
+        dim.id IS NULL
+    {% endif %}
+    
+    GROUP BY
+        src.order_date
+),
+date_attributes AS (
+    SELECT
+        {{ generate_id(this, 'id') }} AS id,
+        full_date AS full_date,
+        EXTRACT (YEAR FROM full_date) AS year,
+        EXTRACT (MONTH FROM full_date) AS month,
+        EXTRACT (DAY FROM full_date) AS day,
+        CASE 
+            WHEN EXTRACT(MONTH FROM full_date) IN (1, 2, 12) THEN 'Winter'
+            WHEN EXTRACT(MONTH FROM full_date) IN (3, 4, 5) THEN 'Spring'
+            WHEN EXTRACT(MONTH FROM full_date) IN (6, 7, 8) THEN 'Summer'
+            ELSE 'Fall'
+        END AS season,
+        WEEKOFYEAR(full_date) AS week_of_year,
+        ingested_at
+    FROM
+        date_series
+)
 
-{% set dim_table = 'date_dim' %}
-
-{% set date_column_mapping = {
-    'order_date': 'full_date',
-} %}
-{% set id_column = 'id' %}
-
-{{ date_scd0_incremental_load_with_mapping(source_table, dim_table, date_column_mapping, id_column) }}
+SELECT 
+    *
+FROM 
+    date_attributes

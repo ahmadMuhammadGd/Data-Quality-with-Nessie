@@ -8,13 +8,42 @@
 ) }}
 
 
-{% set source_table = ref('amazon_orders_silver') %}
-{% set dim_table = 'location_dim' %}
-{% set column_mapping = {
-    'ship_country'     :  'ship_country',
-    'ship_state'       :  'ship_state',
-    'ship_city'        :  'ship_city',
-    'ship_postal_code' :  'ship_postal_code'
-} %}
-{% set id_column = 'id' %}
-{{ scd0_incremental_load_with_mapping(source_table, dim_table, column_mapping, id_column) }}
+WITH src AS (
+    SELECT
+        src.ship_country,
+        src.ship_state,
+        src.ship_city,
+        src.ship_postal_code,
+        MIN(src.ingested_at) AS ingested_at
+    FROM 
+        {{ ref('amazon_orders_silver') }} AS src
+    
+    
+    {% if is_incremental() %}
+    LEFT JOIN
+        {{ this }} AS dim
+    ON
+        dim.ship_country     =  src.ship_country
+    AND
+        dim.ship_state       =  src.ship_state
+    AND
+        dim.ship_city        =  src.ship_city
+    AND
+        dim.ship_postal_code =  src.ship_postal_code
+    WHERE
+        dim.id IS NULL
+    {% endif %}
+    
+    
+    GROUP BY
+        src.ship_country,
+        src.ship_state,
+        src.ship_city,
+        src.ship_postal_code
+)
+
+SELECT
+    {{ generate_id(this, 'id') }} AS id,
+    src.*
+FROM
+    src

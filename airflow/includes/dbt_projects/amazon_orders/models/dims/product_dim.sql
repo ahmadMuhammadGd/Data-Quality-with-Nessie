@@ -7,11 +7,34 @@
 ) }}
 
 
-{% set source_table = ref('amazon_orders_silver') %}
-{% set dim_table = 'product_dim' %}
-{% set column_mapping = {
-    'Category': 'Category',
-    'Size': 'Size'
-} %}
-{% set id_column = 'id' %}
-{{ scd0_incremental_load_with_mapping(source_table, dim_table, column_mapping, id_column) }}
+WITH src AS (
+    SELECT
+        src.Category,
+        src.size,
+        MIN(src.ingested_at) AS ingested_at
+    FROM 
+        {{ ref('amazon_orders_silver') }} AS src
+    
+    
+    {% if is_incremental() %}
+    LEFT JOIN
+        {{ this }} AS dim
+    ON
+        dim.category = src.category
+    AND
+        dim.size = src.size   
+    WHERE
+        dim.id IS NULL
+    {% endif %}
+    
+    
+    GROUP BY
+        src.Category,
+        src.size
+)
+
+SELECT
+    {{ generate_id(this, 'id') }} AS id,
+    src.*
+FROM
+    src
