@@ -7,13 +7,41 @@
 ) }}
 
 
-{% set source_table = ref('amazon_orders_silver') %}
-{% set dim_table = 'shipping_dim' %}
-{% set column_mapping = {
-    'Order_Status'      :   'shipping_status',
-    'Fulfilment'        :   'Fulfilment',
-    'ship_service_level':   'ship_service_level',
-    'fulfilled_by'      :   'fulfilled_by'
-} %}
-{% set id_column = 'id' %}
-{{ scd0_incremental_load_with_mapping(source_table, dim_table, column_mapping, id_column) }}
+WITH src AS (
+    SELECT
+        src.order_status AS shipping_status,
+        src.Fulfilment,
+        src.ship_service_level,
+        src.fulfilled_by,
+        MIN(src.ingested_at) AS ingested_at
+    FROM 
+        {{ ref('amazon_orders_silver') }} AS src
+    
+    {% if is_incremental() %}
+    LEFT JOIN
+        {{ this }} AS dim
+    ON
+        src.order_status       =   dim.shipping_status 
+    AND
+        src.Fulfilment         =   dim.Fulfilment 
+    AND
+        src.ship_service_level =   dim.ship_service_level 
+    AND
+        src.fulfilled_by       =   dim.fulfilled_by
+    WHERE
+        dim.id IS NULL
+    {% endif %}
+    
+    
+    GROUP BY
+        src.order_status,
+        src.Fulfilment,
+        src.ship_service_level,
+        src.fulfilled_by
+)
+
+SELECT
+    {{ generate_id(this, 'id') }} AS id,
+    src.*
+FROM
+    src

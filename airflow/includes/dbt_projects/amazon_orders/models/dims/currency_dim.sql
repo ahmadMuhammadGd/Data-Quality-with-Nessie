@@ -6,9 +6,30 @@
     pre_hook=["SET spark.sql.catalog.nessie.ref= {{ env_var('BRANCH_AMAZON_ORDERS_PIPELINE') }}"]
 ) }}
 
+WITH src AS (
+    SELECT
+        src.currency,
+        MIN(src.ingested_at) AS ingested_at
+    FROM 
+        {{ ref('amazon_orders_silver') }} AS src
+    
+    
+    {% if is_incremental() %}
+    LEFT JOIN
+        {{ this }} AS dim
+    ON
+        dim.currency = src.currency
+    WHERE
+        dim.id IS NULL
+    {% endif %}
+    
+    
+    GROUP BY
+        src.currency
+)
 
-{% set source_table = ref('amazon_orders_silver') %}
-{% set dim_table = 'product_dim' %}
-{% set column_mapping = {'currency': 'currency'} %}
-{% set id_column = 'id' %}
-{{ scd0_incremental_load_with_mapping(source_table, dim_table, column_mapping, id_column) }}
+SELECT
+    {{ generate_id(this, 'id') }} AS id,
+    src.*
+FROM
+    src

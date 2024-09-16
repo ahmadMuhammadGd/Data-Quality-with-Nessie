@@ -14,7 +14,8 @@ SELECT
     prod_dim.id           AS product_id,
     ship_dim.id           AS shipping_id,
     src.qty               AS quantity,
-    ROUND(src.amount ,2)  AS amount
+    ROUND(src.amount ,2)  AS amount,
+    src.ingested_at       AS ingested_at
 
 FROM
     {{ ref('amazon_orders_silver') }} as src
@@ -46,5 +47,5 @@ ON
     src.ship_service_level  = ship_dim.ship_service_level AND
     src.fulfilled_by        = ship_dim.fulfilled_by 
 {% if is_incremental() %}
-    WHERE datediff('day', Ingestion_Date, current_timestamp) < 2
+    WHERE datediff('day', Ingested_at, current_timestamp) < 2
 {% endif %}

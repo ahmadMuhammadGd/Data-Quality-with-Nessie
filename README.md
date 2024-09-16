@@ -124,6 +124,7 @@ sh ./shell-scripts/run.sh
 docker exec spark spark-submit /spark-container/spark/jobs/init_project.py > bash-logs/0-init_job.log
 ```
 
+
 ## Transformation DAG (dbt-core[PyHive])
 
 If dbt transformations fail, manually launch the Thrift server:
@@ -131,7 +132,15 @@ If dbt transformations fail, manually launch the Thrift server:
 ```bash
 docker exec spark sh spark-container/ThriftServer-Iceberg-Nessie.sh
 ```
-  
+If dbt couldn't access the database via thrift connection, check `thrift_sasl` python library. 
+``` bash
+# check if exists 
+pip show thrift_sasl
+
+# install it if doesn't exists
+pip install thrift_sasl
+```
+
 # Airflow Data-Aware DAGs
 ## Branching and Ingestion layer DAG (Bronze)
 ![ingestion and defining nessie branch](./md_assets/airflow/dags/start_ingestion.png)
