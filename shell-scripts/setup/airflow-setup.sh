@@ -1,9 +1,8 @@
-export $(grep -v '^\s*#.*' ./config.env | xargs)
 
 # docker network connect airflow-network spark
 # docker network connect airflow-network minio
 
-docker exec airflow-node /home/airflow/.local/bin/airflow \
+docker exec airflow-scheduler /home/airflow/.local/bin/airflow \
     connections add 'sparkSSH' \
     --conn-type 'ssh' \
     --conn-login 'me' \
@@ -17,7 +16,7 @@ docker exec airflow-node /home/airflow/.local/bin/airflow \
         "AWS_DEFAULT_REGION"    : "${AWS_DEFAULT_REGION}"
     }"
 
-docker exec airflow-node /home/airflow/.local/bin/airflow \
+docker exec airflow-scheduler /home/airflow/.local/bin/airflow \
     connections add 'minio_connection' \
     --conn-type 'aws' \
     --conn-extra "{
