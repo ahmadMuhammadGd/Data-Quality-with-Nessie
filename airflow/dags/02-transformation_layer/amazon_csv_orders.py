@@ -8,6 +8,8 @@ from airflow.datasets.metadata import Metadata # type: ignore
 from datetime import datetime
 from airflow.models import Variable
 import os 
+from includes.data.utils import get_extra_triggering_run
+
     
 
 default_args = {
@@ -17,7 +19,6 @@ default_args = {
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 0,
-    'pool': 'amazon_csv_pipeline_1_slot_pool'
 }
 
 @dag(
@@ -34,7 +35,7 @@ default_args = {
     """
 )
 
-def transform_audit():
+def transform_audit(**context):
     AIRFLOW_HOME = os.getenv('AIRFLOW_HOME')
     DBT_PROJECTS_DIR = os.path.join(AIRFLOW_HOME, 'includes', 'dbt_projects')
     DBT_AMAZON_ORDERS_DIR = os.path.join(DBT_PROJECTS_DIR, 'amazon_orders')
@@ -42,6 +43,9 @@ def transform_audit():
     DBT_SOURCE_MODELS_DIR = os.path.join(DBT_MODELS_DIR, 'sources')
     DBT_DIM_MODELS_DIR = os.path.join(DBT_MODELS_DIR, 'dims')
     DBT_FACTS_MODELS_DIR = os.path.join(DBT_MODELS_DIR, 'facts')
+    
+    extra = get_extra_triggering_run(**context)
+    branch_name = extra["branch_name"]
     
     # @task(task_id='get_models')
     def get_models(dbt_models_dir_path:str) -> list:
@@ -56,17 +60,17 @@ def transform_audit():
             run = BashOperator(
                 task_id = f"run_{model_name}",
                 bash_command= f"""
-                export BRANCH_AMAZON_ORDERS_PIPELINE={{{{ var.value.nessie_branch }}}}
                 cd "{dbt_project_dir}" 
-                dbt run --select {model_name}
+                dbt run --select {model_name} \
+                -- var {{ BRANCH_AMAZON_ORDERS_PIPELINE: {branch_name} }}
                 """
             )
             test = BashOperator(
                 task_id = f"test_{model_name}",
                 bash_command= f"""
-                export BRANCH_AMAZON_ORDERS_PIPELINE={{{{ var.value.nessie_branch }}}}
                 cd "{dbt_project_dir}" 
-                dbt test --select {model_name}
+                dbt test --select {model_name} \
+                -- var {{ BRANCH_AMAZON_ORDERS_PIPELINE: {branch_name} }}
                 """
             )
             run >> test
@@ -76,13 +80,15 @@ def transform_audit():
     
     
     @task(task_id='update_fail_dataset', outlets=[FAIL_DBT_TRANSFORM_DATASET],  trigger_rule="all_failed")
-    def update_fail_dataset():
-        Metadata(FAIL_DBT_TRANSFORM_DATASET, {"failed at": {datetime.now()}})
+    def update_fail_dataset(**context):
+        extra = get_extra_triggering_run(context)
+        yield Metadata(FAIL_DBT_TRANSFORM_DATASET, extra)
             
     # 1.3.2 update dataset
     @task(task_id='update_success_dataset', outlets=[SUCCESS_DBT_TRANSFORM_DATASET])
-    def update_success_dataset():
-        Metadata(SUCCESS_DBT_TRANSFORM_DATASET, {"succeded at": {datetime.now()}})
+    def update_success_dataset(**context):
+        extra = get_extra_triggering_run(context)
+        yield Metadata(SUCCESS_DBT_TRANSFORM_DATASET, extra)
         
     
     parallel_source_task_groups = [create_task_group(t, DBT_AMAZON_ORDERS_DIR) for t in get_models(DBT_SOURCE_MODELS_DIR)]

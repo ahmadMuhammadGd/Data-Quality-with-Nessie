@@ -4,6 +4,7 @@ from airflow.decorators import dag, task, task_group
 from datetime import datetime
 from includes.data.datasets import SUCCESS_INGESTION_DATASET, SUCCESS_CLEANING_DATASET, FAIL_CLEANING_DATASET
 from airflow.datasets.metadata import Metadata # type: ignore
+from includes.data.utils import get_extra_triggering_run
 
 
 default_args = {
@@ -43,13 +44,15 @@ def cleansing_and_loading():
     
     # 2.3 Do something on error
     @task(task_id='update_fail_dataset', outlets=[FAIL_CLEANING_DATASET],  trigger_rule="all_failed")
-    def update_fail_dataset():
-        Metadata(FAIL_CLEANING_DATASET, {"failed at": {datetime.now()}})
+    def update_fail_dataset(**context):
+        extra = get_extra_triggering_run(context)
+        yield Metadata(FAIL_CLEANING_DATASET, extra)
             
     # 1.3.2 update dataset
     @task(task_id='update_success_dataset', outlets=[SUCCESS_CLEANING_DATASET])
-    def update_success_dataset():
-        Metadata(SUCCESS_CLEANING_DATASET, {"succeded at": {datetime.now()}})
+    def update_success_dataset(**context):
+        extra = get_extra_triggering_run(context)
+        yield Metadata(SUCCESS_CLEANING_DATASET, extra)
     
     clean_batch >> validate_cleaned
     validate_cleaned >> [update_fail_dataset(), update_success_dataset()]

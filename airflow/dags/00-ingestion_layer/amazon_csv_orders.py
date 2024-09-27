@@ -5,8 +5,8 @@ from airflow.decorators import dag, task
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from datetime import datetime
 from includes.data.datasets import FAIL_INGESTION_DATASET, SUCCESS_INGESTION_DATASET, INFO_INGESTION_DATASET
+from includes.data.utils import custom_extra_template
 from airflow.datasets.metadata import Metadata # type: ignore
-from includes.pools.pools import CSV_PIPLEINE_POOL
 from airflow.models import Variable
 import logging, os 
 
@@ -17,7 +17,6 @@ default_args = {
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 0,
-    'pool': 'amazon_csv_pipeline_1_slot_pool'
 }
 
 doc_md_DAG="""
@@ -69,15 +68,12 @@ def ingest():
             current_csv_path = object_name
             
             timestamp = datetime.now()
-            curent_timestamp = timestamp.strftime('%Y-%m-%dT%H:%M:%S') # for spark SLQ
+            curent_timestamp = timestamp.strftime('%Y-%m-%dT%H:%M:%S') # for spark SLQ, better readability while debugging sparksubmit commands
             branch_recommended_name = f'{nessie_branch_prefex}_{(current_csv_name).replace('.csv', '')}_{str(timestamp.strftime('%Y%m%d%H%M%S'))}'
             
             kwargs['ti'].xcom_push(key='current_csv'    , value=current_csv_path)
             kwargs['ti'].xcom_push(key='timestamp'      , value=curent_timestamp)
             kwargs['ti'].xcom_push(key='nessie_branch'  , value=branch_recommended_name)
-            
-            Variable.set("nessie_branch", branch_recommended_name)
-            Variable.set("curent_csv", current_csv_path)
             
             return 'defining_new_branch'
     
@@ -135,18 +131,24 @@ def ingest():
     )
     
     # 1.3.1 do something on validation failure
-    @task(task_id='update_fail_dataset', outlets=[FAIL_INGESTION_DATASET],  trigger_rule="all_failed")
-    def update_fail_dataset():
-        Metadata(FAIL_INGESTION_DATASET, {"failed at": {datetime.now()}})
-            
-    # 1.3.2 update dataset
+    @task(task_id='update_fail_dataset', outlets=[FAIL_INGESTION_DATASET], trigger_rule="all_failed")
+    def update_fail_dataset(**kwargs):
+        file_name = kwargs['ti'].xcom_pull(key='current_csv')
+        branch_name = kwargs['ti'].xcom_pull(key='nessie_branch')
+        extra = custom_extra_template(file_name, branch_name)
+        yield Metadata(FAIL_INGESTION_DATASET, extra)
+    
+    # 1.3.2 Update dataset
     @task(task_id='update_success_dataset', outlets=[SUCCESS_INGESTION_DATASET])
-    def update_success_dataset():
-        Metadata(SUCCESS_INGESTION_DATASET, {"succeded at": {datetime.now()}})
+    def update_success_dataset(**kwargs):
+        file_name = kwargs['ti'].xcom_pull(key='current_csv')
+        branch_name = kwargs['ti'].xcom_pull(key='nessie_branch')
+        extra = custom_extra_template(file_name, branch_name)
+        yield Metadata(SUCCESS_INGESTION_DATASET, extra)
     
     @task(task_id='update_info_dataset', outlets=[INFO_INGESTION_DATASET])
     def update_info_dataset():
-        Metadata(INFO_INGESTION_DATASET, {"info: No files found": {datetime.now()}})
+        yield Metadata(INFO_INGESTION_DATASET, {"info: No files found": {datetime.now()}})
         
     
     define_branch = define_branch()

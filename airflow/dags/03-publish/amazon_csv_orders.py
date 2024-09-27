@@ -5,6 +5,7 @@ from includes.data.datasets import SUCCESS_DBT_TRANSFORM_DATASET, SUCCESS_PUBLIS
 from datetime import datetime
 from airflow.datasets.metadata import Metadata # type: ignore
 from airflow.models import Variable
+from includes.data.utils import get_extra_triggering_run
 
 default_args = {
     'owner': 'airflow',
@@ -86,13 +87,15 @@ def publish():
             logging.error(f"Failed to delete {object_name} from {src_bucket}")
     
     @task(task_id='update_fail_dataset', outlets=[FAIL_PUBLISH_DATASET],  trigger_rule="all_failed")
-    def update_fail_dataset():
-        Metadata(FAIL_PUBLISH_DATASET, {"failed at": {datetime.now()}})
+    def update_fail_dataset(**context):
+        extra = get_extra_triggering_run(**context)
+        yield Metadata(FAIL_PUBLISH_DATASET, extra)
             
     # 1.3.2 update dataset
     @task(task_id='update_success_dataset', outlets=[SUCCESS_PUBLISH_DATASET])
-    def update_success_dataset():
-        Metadata(SUCCESS_PUBLISH_DATASET, {"succeded at": {datetime.now()}})
+    def update_success_dataset(**context):
+        extra = get_extra_triggering_run(**context)
+        yield Metadata(SUCCESS_PUBLISH_DATASET, extra)
         
     merge_and_publish >> move_processed() >> [update_success_dataset() , update_fail_dataset()]
 publish()
