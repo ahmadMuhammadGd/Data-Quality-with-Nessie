@@ -3,7 +3,7 @@
     materialized='incremental',
     incremental_strategy='append',
     file_format='iceberg',
-    pre_hook=["SET spark.sql.catalog.nessie.ref= {{ env_var('BRANCH_AMAZON_ORDERS_PIPELINE') }}"]
+    pre_hook=["SET spark.sql.catalog.nessie.ref= {{ var('BRANCH_AMAZON_ORDERS_PIPELINE') }}"]
 ) }}
 
 
@@ -13,7 +13,7 @@ WITH src AS (
         src.Fulfilment,
         src.ship_service_level,
         src.fulfilled_by,
-        MIN(src.ingested_at) AS ingested_at
+        MIN(src.ingestion_date) AS ingestion_date
     FROM 
         {{ ref('amazon_orders_silver') }} AS src
     

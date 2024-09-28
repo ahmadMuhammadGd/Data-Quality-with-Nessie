@@ -4,7 +4,7 @@
     incremental_strategy='append',
     file_format='iceberg',
     partition_by=['ship_country', 'ship_state'],
-    pre_hook=["SET spark.sql.catalog.nessie.ref= {{ env_var('BRANCH_AMAZON_ORDERS_PIPELINE') }}"]
+    pre_hook=["SET spark.sql.catalog.nessie.ref= {{ var('BRANCH_AMAZON_ORDERS_PIPELINE') }}"]
 ) }}
 
 
@@ -14,7 +14,7 @@ WITH src AS (
         src.ship_state,
         src.ship_city,
         src.ship_postal_code,
-        MIN(src.ingested_at) AS ingested_at
+        MIN(src.ingestion_date) AS ingestion_date
     FROM 
         {{ ref('amazon_orders_silver') }} AS src
     
