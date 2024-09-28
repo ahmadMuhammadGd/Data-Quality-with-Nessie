@@ -80,7 +80,8 @@ On the other hand, **dbt-core** tests are tightly integrated into the transforma
 
 The `run.sh` script initializes Docker Compose, copies raw data to MinIO, sets up Airflow and connections, and starts the Spark Thrift server.
 ```bash
-cd /path/to/Data-Quality-with-Nessie
+#Work Directory: Data-Quality-with-Nessie
+echo -e "AIRFLOW_UID=$(id -u)" > .env
 sh ./shell-scripts/run.sh
 ```
 
