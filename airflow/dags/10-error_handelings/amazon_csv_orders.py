@@ -16,6 +16,7 @@ from includes.data.datasets import (
 from airflow.datasets.metadata import Metadata # type: ignore
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 import os, logging 
+from includes.data.utils import get_extra_triggering_run
 
 default_args = {
     'owner': 'airflow',
@@ -47,8 +48,9 @@ default_args = {
 
 def error_handling():
     @task(task_id='move_rejected_csvs')
-    def move_rejected(**kwargs):
-        object_name = Variable.get("curent_csv")
+    def move_rejected(**context):
+        extra = get_extra_triggering_run(context)
+        object_name = extra["fileName"]
 
         
         s3hook = S3Hook(aws_conn_id='minio_connection')
