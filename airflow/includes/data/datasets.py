@@ -6,7 +6,7 @@ def __airflow_dataset(dataset_name:str) -> tuple[Dataset, Dataset]:
         Dataset(f'SUCCESS://{dataset_name}'), 
         Dataset(f'FAIL://{dataset_name}')
     ) 
-
+INFO_FOUND_CSV,_,_ = __airflow_dataset('csv_found')
 INFO_INGESTION_DATASET, SUCCESS_INGESTION_DATASET, FAIL_INGESTION_DATASET                   = __airflow_dataset('ingestion')
 _, SUCCESS_INGESTION_DATASET, FAIL_INGESTION_DATASET                                        = __airflow_dataset('ingestion')
 _, SUCCESS_CLEANING_DATASET, FAIL_CLEANING_DATASET                                          = __airflow_dataset('cleansing')
