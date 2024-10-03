@@ -5,43 +5,15 @@ from modules.soda.helper import check
 from modules.SparkIcebergNessieMinIO.spark_setup import init_or_get_spark_session
 from env_loader import *
 
-
-import getopt, sys
-
-options = "ht:"  
-long_options = ['timestamp=', 'help']
-
-argument_list = sys.argv[1:]
-try:
-    arguments, values = getopt.getopt(argument_list, options, long_options)
-    timestamp = None
-
-    for arg, val in arguments:
-        if arg in ("-h", "--help"):
-            print(f"Usage: {os.path.dirname(os.path.abspath(__file__))} --object-path <path> [options]")
-            print("Options:")
-            print("  -t, --timestamp <timestamp> Timestamp when the ingestion process started")
-            sys.exit()
-        elif arg in ("-t", "--timestamp"):
-            timestamp = val
-
-    if timestamp is None:
-        print("Error: --timestamp (-t) is required")
-        raise RuntimeError
-        sys.exit(2)
-        
-except getopt.GetoptError as err:
-    print(f"Error: {err}")
-    print("Use -h or --help for usage information.")
-    sys.exit(2)
-    
+from modules.CLI import cli
+object_path, timestamp, nessie_branch = cli()
     
 
 ingestion_timestamp = timestamp
 spark = init_or_get_spark_session(app_name="raw data soda validation")
 
 try:
-    spark.sql(f"USE REFERENCE {BRANCH_AMAZON_ORDERS_PIPELINE} IN {NESSIE_CATALOG_NAME}")
+    spark.sql(f"USE REFERENCE {nessie_branch} IN {NESSIE_CATALOG_NAME}")
     current_branch_df = spark.sql('SHOW REFERENCE IN nessie')
     current_branch_pd = current_branch_df.toPandas()["name"]
     logging.info(

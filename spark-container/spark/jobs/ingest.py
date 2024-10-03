@@ -35,48 +35,8 @@ The script is designed with error handling to capture and print any exceptions t
 Finally, the script ensures that the Spark session is properly stopped, releasing resources and avoiding potential issues with resource allocation in subsequent operations.
 
 """
-
-
-import getopt, sys, logging
-from datetime import datetime
-
-# Define command-line options
-options = "ho:t:"  
-long_options = ['object-path=', 'timestamp=', 'help']
-
-argument_list = sys.argv[1:]
-try:
-    arguments, values = getopt.getopt(argument_list, options, long_options)
-    object_path = None 
-    timestamp = None
-
-    for arg, val in arguments:
-        if arg in ("-h", "--help"):
-            print("Usage: python path/to/sparkjob --object-path <path> [options]")
-            print("Options:")
-            print("  -h, --help            Show this help message")
-            print("  -o, --object-path <path>   Path to the object withou s3a//")
-            print("  -t, --timestamp <timestamp> Timestamp when the ingestion process started")
-            sys.exit()
-        elif arg in ("-o", "--object-path"):
-            object_path = val
-        elif arg in ("-t", "--timestamp"):
-            timestamp = val
-
-    if object_path is None:
-        print("Error: --object-path is required")
-        raise RuntimeError
-        sys.exit(2)
-
-    if timestamp is None:
-        print("Error: --timestamp (-t) is required")
-        raise RuntimeError
-        sys.exit(2)
-        
-except getopt.GetoptError as err:
-    print(f"Error: {err}")
-    print("Use -h or --help for usage information.")
-    sys.exit(2)
+from modules.CLI import cli
+object_path, timestamp, nessie_branch = cli()
 
 import sys, os 
 from modules.SparkIcebergNessieMinIO.spark_setup import init_or_get_spark_session
@@ -91,18 +51,18 @@ try:
     
     df=spark.read.option("header", True) \
         .option("inferSchema", True) \
-        .csv(f"s3a://{object_path}") \
+        .csv(object_path) \
         .withColumn("Date", to_date("Date", format="dd-mm-yy")) \
         .withColumnRenamed("Date", "order_date")
     
     
     logging.info(f"Source row count: {df.count()}")
         
-    logging.info(f"Creating branch: `{BRANCH_AMAZON_ORDERS_PIPELINE}` ..")
-    spark.sql(f"CREATE BRANCH IF NOT EXISTS {BRANCH_AMAZON_ORDERS_PIPELINE} IN {NESSIE_CATALOG_NAME} FROM {BRANCH_MAIN}")
+    logging.info(f"Creating branch: `{nessie_branch}` ..")
+    spark.sql(f"CREATE BRANCH IF NOT EXISTS {nessie_branch} IN {NESSIE_CATALOG_NAME} FROM {BRANCH_MAIN}")
     
-    logging.info(f"Switching to the branch: `{BRANCH_AMAZON_ORDERS_PIPELINE}` ..")
-    spark.sql(f"USE REFERENCE {BRANCH_AMAZON_ORDERS_PIPELINE} IN {NESSIE_CATALOG_NAME}")
+    logging.info(f"Switching to the branch: `{nessie_branch}` ..")
+    spark.sql(f"USE REFERENCE {nessie_branch} IN {NESSIE_CATALOG_NAME}")
     
     min_order_date_in_batch = df.selectExpr("min(order_date)").collect()[0][0]
     
