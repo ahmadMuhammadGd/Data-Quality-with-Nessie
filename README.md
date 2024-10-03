@@ -82,7 +82,7 @@ The `run.sh` script initializes Docker Compose, copies raw data to MinIO, sets u
 ```bash
 #Work Directory: Data-Quality-with-Nessie
 echo -e "AIRFLOW_UID=$(id -u)" > .env
-sh ./shell-scripts/run.sh
+. ./shell-scripts/run.sh
 ```
 
 
