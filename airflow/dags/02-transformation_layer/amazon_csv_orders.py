@@ -8,9 +8,8 @@ from airflow.datasets.metadata import Metadata # type: ignore
 from datetime import datetime
 from airflow.models import Variable
 import os 
-from includes.data.utils import get_extra_triggering_run
+from includes.data.utils import get_extra_triggering_run, update_outlet
 
-    
 
 default_args = {
     'owner': 'airflow',
@@ -44,13 +43,11 @@ def transform_audit():
     DBT_DIM_MODELS_DIR = os.path.join(DBT_MODELS_DIR, 'dims')
     DBT_FACTS_MODELS_DIR = os.path.join(DBT_MODELS_DIR, 'facts')
     
+    @task(task_id = 'retrieve_extra')
+    def retrieve_extra(**context)-> dict:
+        return get_extra_triggering_run(context)[0]
 
 
-    @task(task_id="get_branch_name_from_extra")
-    def get_branch_name_from_extra(**context):
-        extra = get_extra_triggering_run(context)  
-        branch_name = extra["branch_name"]
-        return branch_name
 
     # Task to get models from the dbt models directory
     def get_models(dbt_models_dir_path: str) -> list:
@@ -60,12 +57,13 @@ def transform_audit():
         return models
 
     # Task group creator function
-    def create_task_group(model_name: str, dbt_project_dir: str, branch_name: str):
+    def create_task_group(model_name: str, dbt_project_dir: str):
 
         @task_group(group_id=f'{model_name}')
         def dbt_group():
 
-            # BashOperator to run dbt command
+            branch_name = "{{ ti.xcom_pull(task_ids='retrieve_extra')['branch_name'] }}"
+
             run = BashOperator(
                 task_id=f"run_{model_name}",
                 bash_command=f"""
@@ -75,7 +73,6 @@ def transform_audit():
                 """
             )
 
-            # BashOperator to test dbt command
             test = BashOperator(
                 task_id=f"test_{model_name}",
                 bash_command=f"""
@@ -89,40 +86,45 @@ def transform_audit():
 
         return dbt_group()
 
-    # Task to update fail dataset (triggered on failure)
-    @task(task_id='update_fail_dataset', outlets=[FAIL_DBT_TRANSFORM_DATASET], trigger_rule="all_failed")
-    def update_fail_dataset(**context):
-        extra = get_extra_triggering_run(context)
-        yield Metadata(FAIL_DBT_TRANSFORM_DATASET, extra)
-
-    # Task to update success dataset
-    @task(task_id='update_success_dataset', outlets=[SUCCESS_DBT_TRANSFORM_DATASET])
-    def update_success_dataset(**context):
-        extra = get_extra_triggering_run(context)
-        yield Metadata(SUCCESS_DBT_TRANSFORM_DATASET, extra)
 
 
-    # Get the branch name from a separate task
-    branch_name = get_branch_name_from_extra()
+    @task(task_id = 'update_fail_dataset', outlets=[FAIL_DBT_TRANSFORM_DATASET], trigger_rule="one_failed")
+    def update_success(extra, **context):
+        update_outlet(
+            FAIL_DBT_TRANSFORM_DATASET, 
+            content=extra,
+            context=context
+        )
+    
+    @task(task_id = 'update_success_dataset', outlets=[SUCCESS_DBT_TRANSFORM_DATASET])
+    def update_failed(extra, **context):
+        update_outlet(
+            SUCCESS_DBT_TRANSFORM_DATASET,
+            content=extra,
+            context=context
+        )
+    
+    extra = retrieve_extra()
 
     # Source task groups
     parallel_source_task_groups = [
-        create_task_group(t, DBT_AMAZON_ORDERS_DIR, branch_name) for t in get_models(DBT_SOURCE_MODELS_DIR)
+        create_task_group(t, DBT_AMAZON_ORDERS_DIR) for t in get_models(DBT_SOURCE_MODELS_DIR)
     ]
 
     # Dimension task groups
     parallel_dim_task_groups = [
-        create_task_group(t, DBT_AMAZON_ORDERS_DIR, branch_name) for t in get_models(DBT_DIM_MODELS_DIR)
+        create_task_group(t, DBT_AMAZON_ORDERS_DIR) for t in get_models(DBT_DIM_MODELS_DIR)
     ]
 
     # Fact task groups
     parallel_fact_task_groups = [
-        create_task_group(t, DBT_AMAZON_ORDERS_DIR, branch_name) for t in get_models(DBT_FACTS_MODELS_DIR)
+        create_task_group(t, DBT_AMAZON_ORDERS_DIR) for t in get_models(DBT_FACTS_MODELS_DIR)
     ]
 
     # Define task group dependencies
+    extra >> parallel_source_task_groups
     parallel_source_task_groups >> EmptyOperator(task_id='bridge_1') >> parallel_dim_task_groups
     parallel_dim_task_groups >> EmptyOperator(task_id='bridge_2') >> parallel_fact_task_groups
-    parallel_fact_task_groups >> EmptyOperator(task_id='bridge_3') >> [update_fail_dataset(), update_success_dataset()]
+    parallel_fact_task_groups >> EmptyOperator(task_id='bridge_3') >> [update_success(extra), update_failed(extra)]
 
 transform_audit()
