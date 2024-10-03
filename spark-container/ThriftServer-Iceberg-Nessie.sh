@@ -1,10 +1,3 @@
-
-for env_file in /config/*.env; do
-  echo "Exporting variables in $env_file"
-  export $(grep -v '\s*#.*' "$env_file" | xargs)
-done
-
-
 echo "NESSIE_URI: ${NESSIE_URI}"
 echo "BRANCH_MAIN: ${BRANCH_MAIN}"
 echo "MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}"
