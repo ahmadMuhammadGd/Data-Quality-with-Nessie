@@ -12,9 +12,19 @@
 
 # echo -e "AIRFLOW_UID=$(id -u)" > ./airflow/.env
 set -e
+
+. ./shell-scripts/exporter.sh ./config # exporting environment variables in config directory
+
+
+cd ./airflow
+mkdir -p ./dags ./logs ./plugins ./config
+cd .. 
+
 docker compose up minio mc nessie -d
 docker compose -f ./airflow/airflow-compose.yaml up airflow-init -d
 docker compose -f ./airflow/airflow-compose.yaml up -d  
+
+sudo chmod 777 airflow/logs/
 
 sh ./shell-scripts/setup/minio-setup.sh
 

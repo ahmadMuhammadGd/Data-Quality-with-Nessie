@@ -30,12 +30,13 @@ class SSHSparkOperator(BaseOperator):
         The fields that support Jinja templating. In this case, the `python_args` field is templated.
     """
     template_fields = ("python_args",)
+    
     @apply_defaults
-    def __init__(self, task_id: str, application_path: str, ssh_conn_id: str, python_args: str = None, *args, **kwargs):
+    def __init__(self, task_id: str, application_path: str, ssh_conn_id: str, python_args: str = '', *args, **kwargs):
         super().__init__(task_id=task_id, *args, **kwargs)
         self.ssh_conn_id = ssh_conn_id
         self.application_path = application_path
-        self.python_args = python_args or ''
+        self.python_args = python_args
     
     def execute(self, context):
         self.log.info("Preparing to execute Spark job with arguments: %s", self.python_args)
@@ -53,13 +54,15 @@ class SSHSparkOperator(BaseOperator):
         template = Template(env_vars_template)
         env_vars_command = template.render(env_vars=extras)
         
-        self.log.info("env_vars_template: %s", env_vars_command)
-        
+        spark_submit = f"/opt/spark/bin/spark-submit {self.application_path} {self.python_args}".replace("\n", " ")
         ssh_command = f"""
         {env_vars_command}
+
         export PYTHONPATH=/spark-container/spark:/config:/spark-container:/spark-container/soda$PYTHONPATH
-        /opt/spark/bin/spark-submit {self.application_path} {self.python_args}
+        
+        {spark_submit}
         """
+        self.log.info("command: %s", ssh_command)
         
         try:
             with ssh_hook.get_conn() as ssh_client:

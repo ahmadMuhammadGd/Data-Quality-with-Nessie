@@ -5,11 +5,13 @@ from modules.soda.helper import check
 from modules.SparkIcebergNessieMinIO.spark_setup import init_or_get_spark_session
 from env_loader import *
 
+from modules.CLI import cli
+object_path, timestamp, nessie_branch = cli()
 
 spark = init_or_get_spark_session(app_name="data cleaning")
 
 try:
-    spark.sql(f"USE REFERENCE {BRANCH_AMAZON_ORDERS_PIPELINE} IN {NESSIE_CATALOG_NAME}")
+    spark.sql(f"USE REFERENCE {nessie_branch} IN {NESSIE_CATALOG_NAME}")
     
     # selecting last batchs from bronz and silver
     for table_name in [SILVER_AMAZON_ORDERS_TABLE_LAST_BATCH, BRONZE_AMAZON_ORDERS_TABLE_LAST_BATCH]:

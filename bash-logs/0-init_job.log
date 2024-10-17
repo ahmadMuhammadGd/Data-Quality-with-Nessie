@@ -1,5 +1,5 @@
-INFO:root:Successfully loaded `/config/dremio.env
 INFO:root:Successfully loaded `/config/dwh.env
+INFO:root:Successfully loaded `/config/dremio.env
 INFO:root:Successfully loaded `/config/nessie.env
 INFO:root:Successfully loaded `/config/paths.env
 INFO:root:Successfully loaded `/config/minio.env

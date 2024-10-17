@@ -3,6 +3,8 @@ from airflow.utils.dates import days_ago
 from airflow.decorators import dag, task, task_group
 from datetime import datetime
 from airflow.models import Variable
+from includes.data.utils import update_outlet
+
 
 from includes.data.datasets import (
     FAIL_INGESTION_DATASET,
@@ -16,6 +18,7 @@ from includes.data.datasets import (
 from airflow.datasets.metadata import Metadata # type: ignore
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 import os, logging 
+from includes.data.utils import get_extra_triggering_run, update_outlet
 
 default_args = {
     'owner': 'airflow',
@@ -46,16 +49,25 @@ default_args = {
 )
 
 def error_handling():
-    @task(task_id='move_rejected_csvs')
-    def move_rejected(**kwargs):
-        object_name = Variable.get("curent_csv")
 
-        
+    @task(task_id = 'retrieve_extra')
+    def retrieve_extra(**context)-> dict:
+        return get_extra_triggering_run(context)[0]
+
+
+    
+    bucket = os.getenv('QUEUED_BUCKET')
+    extra = retrieve_extra()
+
+
+
+    @task(task_id = 'move')
+    def move(ti=None):
+
         s3hook = S3Hook(aws_conn_id='minio_connection')
         
-        bucket = os.getenv('QUEUED_BUCKET')
-        object_path = f'{object_name}'
-        dist_path = f'rejected_csv/{object_name}'
+        object_path = ti.xcom_pull(task_ids='retrieve_extra')['object_path']
+        dist_path = f'rejected_csv/{object_path}'
         
         copy = s3hook.copy_object(
             source_bucket_key=object_path,  
@@ -63,34 +75,44 @@ def error_handling():
             source_bucket_name=bucket,      
             dest_bucket_name=bucket          
         )
-        
-        if copy:
-            logging.info(f"Successfully copied {object_path} to {dist_path}")
-        else:
-            logging.error(f"Failed to copy {object_path} to {dist_path}")
-        
+
+        logging.info(f"Successfully copied {object_path}")
 
         delete = s3hook.delete_objects(
             bucket=bucket,
-            keys=object_name
+            keys=object_path
         )
         
-        if delete:
-            logging.info(f"Successfully deleted {object_name} from {bucket}")
-        else:
-            logging.error(f"Failed to delete {object_name} from {bucket}")
+
+        logging.info(f"Successfully deleted {object_path}")
+        
+        from includes.batch_processing.utils import remove_object_from_active_processing_files
+        remove_object_from_active_processing_files(
+            'amazon_csv_active_files',
+            object_path
+        )
     
+
+
+    @task(task_id = 'update_fail_dataset', outlets=[FAIL_ERROR_HANDLING_DATASET], trigger_rule="one_failed")
+    def update_success(extra, **context):
+        update_outlet(
+            FAIL_ERROR_HANDLING_DATASET, 
+            content=extra,
+            context=context
+        )
     
-    @task(task_id='update_fail_dataset', outlets=[FAIL_ERROR_HANDLING_DATASET],  trigger_rule="all_failed")
-    def update_fail_dataset():
-        Metadata(FAIL_ERROR_HANDLING_DATASET, {"failed at": {datetime.now()}})
-            
-    # 1.3.2 update dataset
-    @task(task_id='update_success_dataset', outlets=[SUCCESS_ERROR_HANDLING_DATASET])
-    def update_success_dataset():
-        Metadata(SUCCESS_ERROR_HANDLING_DATASET, {"succeded at": {datetime.now()}})
-    
-    
-    move_rejected() >> [update_fail_dataset(), update_success_dataset()]
+    @task(task_id = 'update_success_dataset', outlets=[SUCCESS_ERROR_HANDLING_DATASET])
+    def update_failed(extra, **context):
+        update_outlet(
+            SUCCESS_ERROR_HANDLING_DATASET,
+            content=extra,
+            context=context
+        )
+
+
+    move = move()
+    extra >> move
+    move >> [update_success(extra), update_failed(extra)]
     
 error_handling()

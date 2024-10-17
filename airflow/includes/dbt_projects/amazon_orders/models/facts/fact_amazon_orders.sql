@@ -3,7 +3,7 @@
     materialized='incremental',
     incremental_strategy='append',
     file_format='iceberg',
-    pre_hook=["SET spark.sql.catalog.nessie.ref= {{ env_var('BRANCH_AMAZON_ORDERS_PIPELINE') }}"]
+    pre_hook=["SET spark.sql.catalog.nessie.ref= {{ var('BRANCH_AMAZON_ORDERS_PIPELINE') }}"]
 ) }}
 
 SELECT
@@ -15,7 +15,7 @@ SELECT
     ship_dim.id           AS shipping_id,
     src.qty               AS quantity,
     ROUND(src.amount ,2)  AS amount,
-    src.ingested_at       AS ingested_at
+    src.ingestion_date       AS ingestion_date
 
 FROM
     {{ ref('amazon_orders_silver') }} as src
@@ -47,5 +47,5 @@ ON
     src.ship_service_level  = ship_dim.ship_service_level AND
     src.fulfilled_by        = ship_dim.fulfilled_by 
 {% if is_incremental() %}
-    WHERE datediff('day', Ingested_at, current_timestamp) < 2
+    WHERE datediff('day', ingestion_date, current_timestamp) < 2
 {% endif %}

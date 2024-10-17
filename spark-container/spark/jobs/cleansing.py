@@ -22,6 +22,11 @@
 # 4. remove corrupted dates from Order_ID
 # 5. standarize and fix typos for all string type columns
 
+
+# Define command-line options
+from modules.CLI import cli
+object_path, timestamp, nessie_branch = cli()
+
 import sys, os 
 from modules.SparkIcebergNessieMinIO.spark_setup import init_or_get_spark_session
 from SparkCleaner import CleaningPipeline
@@ -32,7 +37,7 @@ from env_loader import *
 spark = init_or_get_spark_session(app_name="data cleaning")
 
 try:
-    spark.sql(f"USE REFERENCE {BRANCH_AMAZON_ORDERS_PIPELINE} IN {NESSIE_CATALOG_NAME}")
+    spark.sql(f"USE REFERENCE {nessie_branch} IN {NESSIE_CATALOG_NAME}")
     logging.info(f'`{ NESSIE_CATALOG_NAME }.{ BRONZE_NAMESPACE }.{ AMAZON_ORDERS_TABLE }` Table:')
     spark.sql(f"""
     SELECT

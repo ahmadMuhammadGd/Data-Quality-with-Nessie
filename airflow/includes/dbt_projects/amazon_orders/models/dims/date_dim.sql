@@ -3,14 +3,14 @@
     materialized='incremental',
     incremental_strategy='append',
     file_format='iceberg',
-    pre_hook=["SET spark.sql.catalog.nessie.ref= {{ env_var('BRANCH_AMAZON_ORDERS_PIPELINE') }}"],
+    pre_hook=["SET spark.sql.catalog.nessie.ref= {{ var('BRANCH_AMAZON_ORDERS_PIPELINE') }}"],
     partition_by='MONTH(full_date)'
 ) }}
 
 WITH date_series AS (
     SELECT
         src.order_date AS full_date,
-        MIN(ingested_at) AS ingested_at
+        MIN(ingestion_date) AS ingestion_date
     FROM
         {{ ref('amazon_orders_silver') }} AS src
     
@@ -40,7 +40,7 @@ date_attributes AS (
             ELSE 'Fall'
         END AS season,
         WEEKOFYEAR(full_date) AS week_of_year,
-        ingested_at
+        ingestion_date
     FROM
         date_series
 )
